@@ -41,3 +41,13 @@ VALUES (1, 'generate', 'pending', 'แมวอวกาศสีชมพู');
 
 - SELECT * FROM users;
 - SELECT * FROM image_tasks;
+
+# ==========================================
+# 1. ตั้งค่าการเชื่อมต่อฐานข้อมูล (Database)
+# ==========================================
+# ⚠️ สำคัญ: เปลี่ยน IP, User, Password ให้ตรงกับเครื่องคนที่ 3 (Database)
+DB_HOST = '127.0.0.1' 
+DB_PORT = '5432'
+DB_NAME = 'postgres' # ชื่อฐานข้อมูลที่คุณสร้างรอไว้
+DB_USER = 'postgres'
+DB_PASSWORD = 'omerakkaew1727151'
