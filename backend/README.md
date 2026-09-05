@@ -1,705 +1,579 @@
-# Backend
+LUMA Group 11 — Backend AI
 
-Backend เป็นส่วนกลางของระบบ LUMA-group11
-ทำหน้าที่จัดการการสื่อสารระหว่าง Frontend, AI และ Database
-รวมถึงประมวลผลข้อมูลและจัดการ API ของระบบ
+1. ภาพรวม
 
----
+Backend-AI เป็นส่วนกลางของระบบ LUMA Group 11 ทำหน้าที่เชื่อมต่อระหว่าง Frontend, Forge AI และ PostgreSQL
 
-## 1. หน้าที่ของ Backend
-
-Backend เป็นตัวกลางในการควบคุมการไหลของข้อมูลภายในระบบ
-
-โครงสร้างการทำงานหลัก:
+Flow หลักของระบบ:
 
 Frontend
-    |
-    | HTTP Request
-    v
+   │
+   │ POST /generate
+   ▼
+Backend Flask
+   │
+   ├──────────────► PostgreSQL
+   │                 └─ image_tasks
+   │
+   ▼
+Forge AI
+   │
+   │ Base64 image
+   ▼
 Backend
-    |
-    +------------------+
-    |                  |
-    v                  v
-   AI              Database
-    |                  |
-    +--------+---------+
-             |
-             v
-          Backend
-             |
-             | HTTP Response
-             v
-          Frontend
-
-
-Backend มีหน้าที่หลักดังนี้:
-
-- รับข้อมูลจาก Frontend
-- ตรวจสอบข้อมูลที่ได้รับ
-- ประมวลผลข้อมูล
-- ส่งข้อมูลไปยัง AI
-- รับผลลัพธ์จาก AI
-- อ่านข้อมูลจาก Database
-- บันทึกข้อมูลลง Database
-- จัดการ API Endpoint
-- จัดการ Error
-- ส่ง Response กลับไปยัง Frontend
-
----
-
-# 2. บทบาทของ Backend ในระบบ
-
-Backend จะเป็นตัวกลางระหว่างส่วนต่าง ๆ ของระบบ
-
-## 2.1 Frontend
-
-Frontend เป็นส่วนที่ผู้ใช้งานโต้ตอบกับระบบ
-
-Frontend จะส่ง Request มายัง Backend เช่น:
-
-- Prompt
-- ข้อมูลผู้ใช้
-- ตัวเลือกการสร้างรูป
-- ข้อมูลที่ต้องการค้นหา
-- ข้อมูลที่ต้องการบันทึก
-
-Backend จะรับข้อมูลเหล่านี้และนำไปประมวลผลตาม Logic ของระบบ
-
-
-## 2.2 AI
-
-Backend จะเป็นตัวกลางในการเรียกใช้งาน AI
-
-ตัวอย่างการทำงาน:
-
-Frontend
-    |
-    | Prompt
-    v
-Backend
-    |
-    | Request
-    v
-AI
-    |
-    | Result
-    v
-Backend
-    |
-    | Response
-    v
+   │
+   ▼
 Frontend
 
+Frontend ไม่ควรเชื่อมต่อ Database หรือ Forge AI โดยตรง แต่ให้ Backend เป็นตัวกลาง
 
-Backend ไม่ควรให้ Frontend ติดต่อ AI โดยตรง
+2. โครงสร้างโปรเจกต์
 
-เหตุผล:
-
-- ควบคุมการเรียก AI จากจุดเดียว
-- ซ่อนรายละเอียดของ AI Server
-- จัดการ Error ได้ง่าย
-- จัดการ Timeout ได้
-- สามารถเปลี่ยน AI ในอนาคตได้ง่าย
-- สามารถบันทึกข้อมูลการใช้งานลง Database
-
-
-## 2.3 Database
-
-Backend เป็นตัวกลางในการติดต่อ Database
-
-ตัวอย่างการทำงาน:
-
-Frontend
-    |
-    | Request
-    v
-Backend
-    |
-    | Query
-    v
-Database
-    |
-    | Data
-    v
-Backend
-    |
-    | Response
-    v
-Frontend
-
-
-Backend จะเป็นผู้จัดการการอ่านและเขียนข้อมูลกับ Database
-
-Frontend ไม่ควรเชื่อมต่อ Database โดยตรง
-
----
-
-# 3. โครงสร้าง Backend
-
-โครงสร้างปัจจุบัน:
+โครงสร้างที่ใช้:
 
 LUMA-group11/
-│
 ├── backend/
+│   ├── app.py
+│   ├── .env
 │   ├── README.md
-│   ├── LOGBOOK.md
-│   └── app.py
-│
+│   └── LOGBOOK.md
 ├── ai/
-│
 ├── database/
-│
 ├── frontend/
-│
-├── requirements.txt
-│
 ├── venv/
-│
+├── requirements.txt
 └── .gitignore
 
+3. Git และ Branch
 
-รายละเอียด:
+เริ่มต้นทำงานโดยแยกงาน Backend ออกจาก branch หลัก
 
-### backend/app.py
+สร้าง branch:
 
-ไฟล์หลักของ Flask Backend
+git switch -c backend
 
-ใช้สำหรับ:
+ภายหลังมีการใช้ branch:
 
-- สร้าง Flask Application
-- สร้าง API Endpoint
-- รับ Request
-- ประมวลผล Request
-- ส่ง Response
+backend-ai
 
-### backend/README.md
+การ Sync กับทีมและ devops:
 
-เอกสารอธิบาย Backend
+git fetch origin
+git switch backend-ai
+git pull origin backend-ai
+git merge origin/devops
+git push origin backend-ai
 
-### backend/LOGBOOK.md
+หาก Push แล้วขึ้น non-fast-forward ให้ใช้:
 
-บันทึกขั้นตอนการพัฒนา Backend โดยละเอียด
+git pull --rebase origin backend-ai
+git push origin backend-ai
 
-### requirements.txt
+ไม่ควรใช้ force push กับ branch ที่ทำงานร่วมกับทีมโดยไม่ตกลงกับทีมก่อน
 
-เก็บรายการ Python Package ที่ใช้ในโปรเจกต์
+4. ตรวจสอบ Python
 
-### venv/
+โปรเจกต์ใช้ Python 3.10
 
-Virtual Environment สำหรับแยก Package ของโปรเจกต์ออกจาก Python หลักของเครื่อง
+ตรวจสอบ:
 
----
+python --version
 
-# 4. เทคโนโลยีที่ใช้
-
-## Python
-
-Version:
+เวอร์ชันที่ใช้ในการทำงาน:
 
 Python 3.10.11
 
+หมายเหตุ: หาก py --version แสดง Python เวอร์ชันอื่น ให้ใช้คำสั่ง python ที่ชี้ไปยัง Python 3.10 ของโปรเจกต์
 
-## Flask
+5. สร้าง Virtual Environment
 
-Version:
+เข้า root ของโปรเจกต์:
 
-Flask 3.1.3
+cd "C:\Ai gen\ProjectFN\LUMA-group11"
 
+สร้าง venv:
 
-Flask ใช้สำหรับสร้าง Web Server และ REST API ของ Backend
+python -m venv venv
 
+เปิดใช้งานใน PowerShell:
 
-## Requests
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
 
-มีแผนจะใช้ Package `requests`
-สำหรับติดต่อกับ AI Server ที่อยู่บนเครื่องอื่น
+เมื่อสำเร็จจะเห็นประมาณ:
 
-Package นี้จะติดตั้งเมื่อเริ่มพัฒนาส่วนเชื่อมต่อ AI จริง
+(venv) PS C:\Ai gen\ProjectFN\LUMA-group11>
 
----
+6. ติดตั้ง Flask และ Packages
 
-# 5. Environment
+ติดตั้ง packages ที่ Backend ใช้:
 
-Backend ใช้ Virtual Environment
+pip install flask requests psycopg2-binary python-dotenv flask-cors
 
-ชื่อ:
+สร้าง/อัปเดต requirements:
 
-venv
+pip freeze > requirements.txt
 
+Packages หลัก:
 
-เหตุผลที่ใช้ Virtual Environment:
+Flask
+requests
+psycopg2-binary
+python-dotenv
+flask-cors
 
-- แยก Package ของโปรเจกต์
-- ป้องกัน Package ชนกับโปรเจกต์อื่น
-- ทำให้สมาชิกในทีมติดตั้ง Environment เหมือนกันได้
-- สามารถใช้ requirements.txt ในการติดตั้ง Package ใหม่ได้
+7. สร้าง Flask Backend
 
----
+สร้างไฟล์:
 
-# 6. API
+backend/app.py
 
-Backend จะให้บริการ API สำหรับ Frontend
+Backend เริ่มต้นจาก API Health Check เพื่อทดสอบว่า Flask ทำงานได้
 
-API จะใช้ HTTP Request และ HTTP Response
+Endpoint:
 
-ตัวอย่างรูปแบบ:
-
-Frontend
-    |
-    | POST /api/...
-    v
-Backend
-    |
-    | Response
-    v
-Frontend
-
-
-API จริงของระบบจะถูกกำหนดเพิ่มเติมเมื่อมีการสรุป Interface
-ระหว่าง Backend, Frontend, AI และ Database
-
----
-
-# 7. Health Endpoint
-
-ปัจจุบัน Backend มี Endpoint สำหรับตรวจสอบ Server
-
-## GET /health
-
-URL:
-
-http://localhost:5000/health
-
-
-หน้าที่:
-
-ตรวจสอบว่า Flask Backend สามารถเปิด Server
-และตอบ Request ได้หรือไม่
-
+GET /health
 
 Response:
 
 {
-    "status": "ok"
+  "status": "ok"
 }
-
-
-หากได้รับ Response ดังกล่าว
-แสดงว่า Backend สามารถทำงานและตอบ Request ได้
-
----
-
-# 8. AI Integration
-
-AI Server ที่ใช้สำหรับการพัฒนาระบบอยู่บนเครื่องอื่นใน Network
-
-ตัวอย่าง Address:
-
-http://10.192.0.232:7860
-
-
-Backend จะเรียก AI ผ่าน API:
-
-/sdapi/v1/txt2img
-
-
-ตัวอย่างการทำงาน:
-
-Frontend
-    |
-    | Prompt
-    v
-Backend
-    |
-    | POST /sdapi/v1/txt2img
-    v
-AI / Forge
-    |
-    | Base64 Image
-    v
-Backend
-    |
-    | Response
-    v
-Frontend
-
-
----
-
-# 9. AI Configuration
-
-Backend ไม่ควร Hardcode AI เป็น:
-
-127.0.0.1
-
-
-เนื่องจาก AI Server อยู่บนเครื่องอื่น
-
-ให้กำหนดเป็น Configuration:
-
-FORGE_URL = "http://10.192.0.232:7860"
-
-
-จากนั้น Backend สามารถเรียก:
-
-f"{FORGE_URL}/sdapi/v1/txt2img"
-
-
-การแยก URL ออกจาก Logic จะช่วยให้สามารถเปลี่ยน AI Server
-ได้โดยไม่ต้องแก้ Logic หลักของระบบ
-
----
-
-# 10. AI Request
-
-ข้อมูลที่ Backend สามารถส่งไปยัง AI ได้แก่:
-
-- prompt
-- negative_prompt
-- steps
-- width
-- height
-- cfg_scale
-- sampler_name
-
-
-ตัวอย่าง:
-
-{
-    "prompt": "a cute cat, high quality",
-    "negative_prompt": "low quality, blurry",
-    "steps": 10,
-    "width": 512,
-    "height": 512,
-    "cfg_scale": 7,
-    "sampler_name": "Euler a"
-}
-
-
----
-
-# 11. AI Response
-
-AI จะส่งข้อมูลรูปภาพกลับมาในรูปแบบ Base64
-
-ตัวอย่างการอ่านข้อมูล:
-
-data = response.json()
-
-image_base64 = data["images"][0]
-
-
-Backend สามารถนำข้อมูลนี้ไป:
-
-- ส่งกลับ Frontend
-- บันทึกไฟล์
-- ประมวลผลเพิ่มเติม
-- บันทึกข้อมูลที่เกี่ยวข้องลง Database
-
-รายละเอียดจะขึ้นอยู่กับ Design ของระบบจริง
-
----
-
-# 12. AI Error Handling
-
-การเรียก AI ต้องมีการจัดการ Error
-
-ตัวอย่างปัญหาที่ต้องรองรับ:
-
-- AI Server ไม่ทำงาน
-- IP ของ AI เปลี่ยน
-- Network ไม่สามารถเชื่อมต่อได้
-- Timeout
-- AI ส่ง Response ผิดรูปแบบ
-- AI ประมวลผลไม่สำเร็จ
-
-
-Backend ควรส่ง Error Response ที่ Frontend เข้าใจได้
-
-ตัวอย่าง:
-
-{
-    "error": "AI service unavailable"
-}
-
-
----
-
-# 13. Database Integration
-
-Backend จะเป็นผู้ติดต่อ Database
-
-ข้อมูลที่อาจเกี่ยวข้องกับระบบ เช่น:
-
-- ข้อมูลผู้ใช้
-- Prompt
-- ผลลัพธ์จาก AI
-- ประวัติการสร้างรูป
-- ข้อมูลการใช้งานระบบ
-- Metadata ของรูปภาพ
-
-
-โครงสร้าง Database และชนิดของ Database
-จะกำหนดหลังจากประสานงานกับผู้รับผิดชอบ Database
-
----
-
-# 14. Frontend Integration
-
-Frontend จะไม่ติดต่อ AI หรือ Database โดยตรง
-
-การสื่อสารหลัก:
-
-Frontend
-    |
-    | HTTP
-    v
-Backend
-    |
-    +------> AI
-    |
-    +------> Database
-
-
-ข้อดี:
-
-- ลดความซับซ้อนของ Frontend
-- รวม Business Logic ไว้ที่ Backend
-- เพิ่มความปลอดภัย
-- เปลี่ยน AI หรือ Database ได้ง่ายขึ้น
-- จัดการ Error จากจุดเดียว
-
----
-
-# 15. การทำงานที่คาดหวังของระบบ
-
-ตัวอย่าง Workflow สำหรับการสร้างรูปภาพ:
-
-1. User กรอก Prompt ใน Frontend
-2. Frontend ส่ง Prompt ไปยัง Backend
-3. Backend ตรวจสอบข้อมูล
-4. Backend ส่ง Prompt ไปยัง AI
-5. AI สร้างรูปภาพ
-6. AI ส่งผลลัพธ์กลับ Backend
-7. Backend ประมวลผลผลลัพธ์
-8. Backend อาจบันทึกข้อมูลลง Database
-9. Backend ส่งผลลัพธ์กลับ Frontend
-10. Frontend แสดงผลให้ User
-
-Workflow:
-
-User
-  |
-  v
-Frontend
-  |
-  | Prompt
-  v
-Backend
-  |
-  v
-AI
-  |
-  | Image
-  v
-Backend
-  |
-  +----> Database
-  |
-  v
-Frontend
-  |
-  v
-User
-
----
-
-# 16. Git Branch
-
-Backend พัฒนาบน Branch:
-
-backend
-
-
-มี Branch ที่เกี่ยวข้อง:
-
-- main
-- backend
-- backend-ai
-
-
-แนวทางการทำงาน:
-
-main
-    |
-    +---- backend
-              |
-              +---- backend-ai
-
-
-Backend สามารถพัฒนาบน Branch ของตัวเอง
-และ Merge เข้ากับ Branch ที่เกี่ยวข้องตาม Workflow ของทีม
-
----
-
-# 17. การติดตั้ง
-
-## ตรวจสอบ Python
-
-python --version
-
-
-ต้องใช้:
-
-Python 3.10.11
-
-
-## สร้าง Virtual Environment
-
-python -m venv venv
-
-
-## เปิดใช้งาน Virtual Environment
-
-Windows PowerShell:
-
-.\venv\Scripts\Activate.ps1
-
-
-หาก PowerShell ไม่อนุญาต:
-
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
-จากนั้น:
-
-.\venv\Scripts\Activate.ps1
-
-
-เมื่อสำเร็จจะเห็น:
-
-(venv)
-
-
-## ติดตั้ง Package
-
-pip install -r requirements.txt
-
----
-
-# 18. การรัน Backend
-
-จากโฟลเดอร์หลัก:
-
-LUMA-group11
-
 
 รัน:
 
-python backend\app.py
+python backend/app.py
 
-
-Backend จะเปิดที่:
+Server ใช้:
 
 http://localhost:5000
 
+และรันแบบ:
 
----
+app.run(host="0.0.0.0", port=5000, debug=True)
 
-# 19. การทดสอบ
+เพื่อให้เครื่องอื่นใน LAN สามารถเข้าถึง Backend ผ่าน IP ของเครื่อง Backend ได้
+
+8. ทดสอบ Backend
 
 เปิด:
 
 http://localhost:5000/health
 
-
-Expected Response:
+ผลที่ต้องได้:
 
 {
-    "status": "ok"
+  "status": "ok"
 }
 
+จุดนี้ยืนยันว่า:
 
-หากได้รับ Response ดังกล่าว:
+Flask Backend = ทำงาน
 
-Backend Server      PASS
-Health Endpoint     PASS
+9. เชื่อมต่อ Forge AI
 
----
+Forge AI ใช้เครื่อง AI ที่อยู่ใน LAN
 
-# 20. สถานะการพัฒนา
+ตัวอย่าง URL ที่ใช้ระหว่างการพัฒนา:
 
-## Environment
+http://10.192.0.232:7860
 
-- [x] Python 3.10.11
-- [x] Git
-- [x] Virtual Environment
-- [x] Flask 3.1.3
-- [x] requirements.txt
+ทดสอบ Network:
 
-## Backend
+Test-NetConnection 10.192.0.232 -Port 7860
 
-- [x] Flask Application
-- [x] Health Endpoint
-- [x] เปิด Server ได้
-- [x] ทดสอบ /health สำเร็จ
+หากสำเร็จต้องเห็น:
 
-## Git
+TcpTestSucceeded : True
 
-- [x] สร้าง Branch backend
-- [x] Commit requirements.txt
-- [x] Commit app.py
-- [x] Merge backend -> backend-ai
-- [x] Push backend-ai ขึ้น GitHub
-- [x] ตรวจสอบ Working Tree
+10. ทดสอบ Forge โดยตรง
 
-## Integration
+มีการสร้างไฟล์ทดสอบสำหรับส่ง Prompt ไป Forge และรับรูปกลับมาเป็น Base64
 
-- [ ] ออกแบบ API จริง
-- [ ] เชื่อม Frontend
-- [ ] ติดตั้ง requests
-- [ ] เชื่อม AI
-- [ ] ทดสอบ AI API
-- [ ] เชื่อม Database
-- [ ] ออกแบบ Database API
-- [ ] Error Handling
-- [ ] End-to-End Testing
+การทดสอบยืนยันว่า:
 
----
+Backend machine
+      ↓
+Forge AI
+      ↓
+Generated image
 
-# 21. แนวทางการพัฒนาต่อ
+ทำงานได้
 
-ขั้นตอนถัดไปของ Backend:
+ไฟล์รูปทดสอบ forge_test.png ถูกกำหนดไม่ให้ติด Git
 
-1. ประสานงานกับ Frontend
-2. กำหนด API ที่ Frontend ต้องใช้
-3. ประสานงานกับ AI
-4. ทดสอบการเชื่อมต่อ AI Server
-5. สร้าง AI Service ใน Backend
-6. ประสานงานกับ Database
-7. สร้าง Database Service
-8. เชื่อม API ทั้งหมดเข้าด้วยกัน
-9. เพิ่ม Error Handling
-10. ทดสอบระบบแบบ End-to-End
+11. เชื่อม PostgreSQL
 
----
+Database ของทีมอยู่บนเครื่อง Database ใน LAN
 
-# 22. หลักการสำคัญ
+ค่าที่ใช้ระหว่างการพัฒนา:
 
-Backend ควรทำหน้าที่เป็นตัวกลางของระบบ
+DATABASE_HOST=192.168.1.137
+DATABASE_PORT=5432
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+
+Password ต้องเก็บใน .env และไม่ควรใส่ใน Git หรือ README
+
+ทดสอบ Port:
+
+Test-NetConnection 192.168.1.137 -Port 5432
+
+12. สร้าง .env
+
+ไฟล์อยู่ที่:
+
+backend/.env
+
+รูปแบบ:
+
+FORGE_URL=http://<AI-IP>:7860
+
+DATABASE_HOST=<DATABASE-IP>
+DATABASE_PORT=5432
+DATABASE_NAME=<DATABASE-NAME>
+DATABASE_USER=postgres
+DATABASE_PASSWORD=<PASSWORD>
+
+ในการพัฒนาที่ใช้อยู่:
+
+FORGE_URL=http://10.192.0.232:7860
+
+DATABASE_HOST=192.168.1.137
+DATABASE_PORT=5432
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+DATABASE_PASSWORD=<private>
+
+ห้าม commit .env
+
+13. .gitignore
+
+ควรมีอย่างน้อย:
+
+.env
+backend/.env
+__pycache__/
+*.pyc
+venv/
+.venv/
+node_modules/
+*.log
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+forge_test.png
+
+หากมีไฟล์ทดสอบที่เก็บ password เช่น testrun.env ต้องไม่ commit เช่นกัน
+
+14. แก้ปัญหา .env
+
+ในช่วงแรกมีปัญหาเพราะไฟล์ Environment ไม่ได้ถูกโหลดจากตำแหน่งที่ Backend ใช้งาน
+
+จึงกำหนดตำแหน่ง .env โดยตรง:
+
+BASE_DIR = Path(__file__).resolve().parent
+ENV_FILE = BASE_DIR / ".env"
+
+load_dotenv(ENV_FILE)
+
+ทำให้ Backend โหลด:
+
+backend/.env
+
+โดยตรง
+
+ตรวจสอบได้จากข้อความตอนรัน:
+
+ENV exists: True
+Database Host: 192.168.1.137
+Database Port: 5432
+Database Name: postgres
+Database User: postgres
+Database Password exists: True
+Forge URL: http://10.192.0.232:7860
+
+15. สร้าง /db-health
+
+Endpoint:
+
+GET /db-health
+
+ใช้:
+
+SELECT 1;
+
+เพื่อทดสอบ PostgreSQL
+
+ผลที่ทดสอบได้:
+
+{
+  "status": "ok",
+  "database": "connected",
+  "result": 1
+}
+
+จุดนี้ยืนยันว่า:
+
+Backend → PostgreSQL = สำเร็จ
+
+16. Database Schema
+
+Database ของเพื่อนมี users และ image_tasks
+
+users
+
+id
+username
+email
+password_hash
+created_at
+
+image_tasks
+
+id
+user_id
+task_type
+status
+prompt_text
+input_image_path
+output_image_path
+created_at
+updated_at
+
+สำหรับงาน Generate:
+
+task_type = generate
+
+Status ที่ระบบรองรับ:
+
+pending
+processing
+completed
+failed
+
+prompt_text คือช่องที่ใช้เก็บ Prompt จาก Frontend
+
+user_id ต้องอ้างอิง users.id
+
+17. การทำงานของ /generate
+
+Endpoint:
+
+POST /generate
+
+รับข้อมูลจาก Frontend เช่น:
+
+{
+  "prompt": "แมวใส่แว่นกำลังนั่งอยู่ในห้องเรียน",
+  "user_id": 1
+}
+
+Backend ทำงานตามลำดับ:
+
+1. รับ Prompt
+       ↓
+2. ตรวจสอบ Prompt
+       ↓
+3. INSERT image_tasks
+   status = pending
+       ↓
+4. UPDATE status = processing
+       ↓
+5. ส่ง Prompt ไป Forge
+       ↓
+6. รับ Base64 image
+       ↓
+7. UPDATE status = completed
+       ↓
+8. ส่ง image + task_id กลับ Frontend
+
+ถ้า Forge หรือ Database เกิดปัญหา:
+
+status = failed
+
+18. ตัวอย่าง /generate
+
+Request:
+
+{
+  "prompt": "แมวใส่แว่นกำลังนั่งอยู่ในห้องเรียน",
+  "user_id": 1
+}
+
+สามารถส่ง parameters เพิ่มได้:
+
+{
+  "prompt": "แมวใส่แว่นกำลังนั่งอยู่ในห้องเรียน",
+  "user_id": 1,
+  "negative_prompt": "low quality, blurry",
+  "steps": 10,
+  "width": 512,
+  "height": 512,
+  "cfg_scale": 7,
+  "sampler_name": "Euler a"
+}
+
+Response สำเร็จ:
+
+{
+  "status": "ok",
+  "task_id": 1,
+  "image": "BASE64_IMAGE"
+}
+
+19. ทดสอบ /generate
+
+PowerShell:
+
+$body = @{
+    prompt = "แมวใส่แว่นกำลังนั่งอยู่ในห้องเรียน"
+    user_id = 1
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "http://localhost:5000/generate" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body $body
+
+ผลการทดสอบที่ได้:
+
+image
+-----
+iVBORw0KGgo...
+
+หมายความว่า Forge สร้างภาพสำเร็จและ Backend ส่ง Base64 image กลับมาได้
+
+20. Frontend → Backend
+
+Frontend ถูกตั้งค่าให้เรียก Backend ผ่าน IP ของเครื่อง Backend เมื่อต้องทดสอบจากเครื่องอื่นใน LAN
+
+ไม่ใช้:
+
+localhost
+
+จากเครื่อง Client เพราะ localhost จะหมายถึงเครื่อง Client เอง
+
+ใช้ IP ของเครื่อง Backend เช่น:
+
+http://<BACKEND-IP>:5000/generate
+
+Flow จริงที่ทดสอบ:
 
 Frontend
-    |
-    v
+   ↓
 Backend
-    |
-    +---- AI
-    |
-    +---- Database
+   ↓
+Forge AI
+   ↓
+Backend
+   ↓
+Frontend
 
+สามารถ Generate และแสดงภาพได้
 
-ไม่ควรให้ Frontend ติดต่อ AI หรือ Database โดยตรง
-หากไม่จำเป็นต่อ Architecture ของระบบ
+21. Prompt → Database
 
-การออกแบบ API และโครงสร้าง Backend จริง
-จะปรับตามข้อกำหนดของระบบและการตกลงร่วมกันของสมาชิกทีม
+เมื่อ Frontend ส่ง Prompt:
+
+{
+  "prompt": "แมวใส่แว่นกำลังนั่งอยู่ในห้องเรียน",
+  "user_id": 1
+}
+
+Backend จะบันทึกลง:
+
+image_tasks.prompt_text
+
+พร้อม:
+
+task_type = generate
+status = pending
+
+จากนั้น:
+
+pending
+   ↓
+processing
+   ↓
+completed
+
+22. ตรวจสอบ Prompt ใน Database
+
+ใช้ SQL:
+
+SELECT
+    id,
+    user_id,
+    task_type,
+    status,
+    prompt_text,
+    created_at,
+    updated_at
+FROM image_tasks
+ORDER BY id DESC;
+
+ควรเห็นข้อมูล เช่น:
+
+id | user_id | task_type | status    | prompt_text
+---+---------+-----------+-----------+-------------------------
+1  | 1       | generate  | completed | แมวใส่แว่น...
+
+23. สถานะปัจจุบัน
+
+Python / venv                  ✅
+Flask Backend                  ✅
+/health                        ✅
+.env                           ✅
+PostgreSQL Connection          ✅
+/db-health                     ✅
+Forge AI Connection            ✅
+Forge Image Generation         ✅
+/generate                      ✅
+Frontend → Backend             ✅
+Backend → Forge                ✅
+Forge → Backend                ✅
+Backend → Frontend             ✅
+Prompt → image_tasks           ✅ Implemented
+Image Storage / output path    ⬜ ยังไม่ได้ทำในขั้นตอนนี้
+
+24. ข้อควรระวัง
+
+ห้าม commit
+
+backend/.env
+
+เพราะมี Database Password
+
+ห้ามส่ง Password ใน GitHub/Discord/README
+
+หาก Password ที่เคยแชร์เป็น Password จริง ควรเปลี่ยน Password หลังการทดสอบ
+
+Frontend
+
+เครื่องอื่นใน LAN ต้องเรียก Backend ด้วย IP ของเครื่อง Backend ไม่ใช่ localhost
+
+25. Git ก่อนส่งงาน
+
+ตรวจสอบ:
+
+git status
+
+Sync:
+
+git fetch origin
+git switch backend-ai
+git pull origin backend-ai
+git merge origin/devops
+
+ตรวจสอบว่า .env ไม่ติด Git:
+
+git status
+
+จากนั้น:
+
+git add backend/app.py backend/README.md backend/LOGBOOK.md requirements.txt .gitignore
+git commit -m "complete backend ai integration"
+git push origin backend-ai
