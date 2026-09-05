@@ -1,4 +1,10 @@
--- 1. สร้าง Enum สำหรับประเภทงานและสถานะ เพื่อจำกัดค่าที่รับได้และป้องกันข้อมูลผิดพลาด
+-- ลบตารางและประเภทข้อมูลเก่าทิ้ง (หากมี) เพื่อให้รันไฟล์นี้ซ้ำได้โดยไม่ Error
+DROP TABLE IF EXISTS image_tasks CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TYPE IF EXISTS task_type_enum;
+DROP TYPE IF EXISTS task_status_enum;
+
+-- 1. สร้าง Enum สำหรับประเภทงานและสถานะ
 CREATE TYPE task_type_enum AS ENUM ('generate', 'remove_bg', 'enhance');
 CREATE TYPE task_status_enum AS ENUM ('pending', 'processing', 'completed', 'failed');
 
@@ -22,22 +28,12 @@ CREATE TABLE image_tasks (
     output_image_path TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
-    -- สร้าง Foreign Key เชื่อมไปยังตาราง users (ลบ user ก็จะลบ task ด้วย)
-    CONSTRAINT fk_user
-        FOREIGN KEY(user_id) 
-        REFERENCES users(id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 4. สร้าง Trigger เพื่อให้อัปเดตคอลัมน์ updated_at อัตโนมัติเวลามีการแก้ไขข้อมูล
+-- 4. สร้าง Trigger เพื่ออัปเดต updated_at อัตโนมัติเวลาข้อมูลมีการเปลี่ยนแปลง
 CREATE OR REPLACE FUNCTION update_modified_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
+RETURNS TRIGGER AS $$ BEGIN     NEW.updated_at = now();     RETURN NEW; END; $$ language 'plpgsql';
 
 CREATE TRIGGER update_image_tasks_modtime
 BEFORE UPDATE ON image_tasks
