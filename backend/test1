@@ -1,0 +1,45 @@
+$body = @{
+    prompt = "a cute cat, high quality"
+    negative_prompt = "low quality, blurry"
+    steps = 10
+    width = 512
+    height = 512
+    cfg_scale = 7
+    sampler_name = "Euler a"
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod 
+    -Uri "http://10.192.0.232:7860/sdapi/v1/txt2img" 
+    -Method Post 
+    -ContentType "application/json" 
+    -Body $body
+
+[IO.File]::WriteAllBytes("forge_test.png", [Convert]::FromBase64String($response.images[0]))
+ถ้าสำเร็จ จะได้ไฟล์:
+forge_test.png
+นี่คือหลักฐานว่า Backend เครื่องอื่นสามารถใช้ AI ได้จริง
+Backend ต้องตั้งค่าแบบนี้
+ใน Backend อย่า hardcode เป็น 127.0.0.1
+ให้ทำเป็น config:
+FORGE_URL = "http://10.192.0.232:7860/"
+แล้วเรียก:
+import requests
+
+payload = {
+    "prompt": "a cute cat, high quality",
+    "negative_prompt": "low quality, blurry",
+    "steps": 10,
+    "width": 512,
+    "height": 512,
+    "cfg_scale": 7,
+    "sampler_name": "Euler a"
+}
+
+response = requests.post(
+    f"{FORGE_URL}/sdapi/v1/txt2img",
+    json=payload,
+    timeout=180
+)
+
+data = response.json()
+image_base64 = data["images"][0]

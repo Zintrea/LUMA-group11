@@ -1,496 +1,705 @@
 # Backend
 
-ส่วนนี้เป็นงานของผู้รับผิดชอบ Backend
-
-README นี้เป็นตัวอย่างสำหรับบันทึกวิธีใช้งานของส่วนนี้
-ให้แก้ข้อมูลให้ตรงกับงานจริงเมื่อเริ่มพัฒนา
-
-## 1. ส่วนนี้ทำอะไร
-
-ตัวอย่าง:
-
-รับคำสั่งจาก Frontend แล้วจัดการงานของระบบ เช่น
-
-- รับ Prompt
-- ติดต่อ AI
-- ติดต่อ Database
-- ส่งผลลัพธ์กลับ Frontend
-
-## 2. ต้องลงอะไร
-
-ตัวอย่าง:
-
-- Python 3.12
-- Flask
-
-ถ้ามี Package เพิ่มเติม ให้ระบุไว้ตรงนี้
-
-## 3. ติดตั้ง
-
-ตัวอย่าง:
-
-```bash
-pip install -r requirements.txt
-```
-
-ถ้าไม่มี requirements.txt ให้แก้ส่วนนี้ตามวิธีติดตั้งจริง
-
-## 4. รัน
-
-ตัวอย่าง:
-
-```bash
-python app.py
-```
-
-ตัวอย่าง Address:
-
-```text
-localhost
-```
-
-## 5. ทดสอบ
-
-ตัวอย่าง:
-
-เปิด:
-
-```text
-localhost
-```
-
-หรือ Health Endpoint เช่น:
-
-```text
-localhost/health
-```
-
-ถ้า Backend ตอบกลับได้ ถือว่า Backend เปิดทำงานสำเร็จ
+Backend เป็นส่วนกลางของระบบ LUMA-group11
+ทำหน้าที่จัดการการสื่อสารระหว่าง Frontend, AI และ Database
+รวมถึงประมวลผลข้อมูลและจัดการ API ของระบบ
 
 ---
 
-เมื่อเริ่มพัฒนาจริง ให้แก้ README นี้ให้ตรงกับคำสั่งติดตั้ง รัน และทดสอบของจริง
+## 1. หน้าที่ของ Backend
 
-
-
-
-
-
-
-# Backend
-
-ส่วนนี้เป็นงาน Backend ของโปรเจกต์ LUMA-group11
-
-Backend ทำหน้าที่เป็นส่วนกลางในการรับ Request จาก Frontend
-ประมวลผลข้อมูล และส่ง Response กลับไปยัง Frontend
-
-ปัจจุบัน Backend อยู่ในขั้นตอนเริ่มต้นของการพัฒนา
-โดยได้จัดเตรียม Flask Server และ Health Endpoint สำหรับทดสอบระบบแล้ว
-
----
-
-## 1. ส่วนนี้ทำอะไร
-
-Backend เป็นส่วนกลางของระบบ ทำหน้าที่เชื่อมต่อและจัดการการทำงานระหว่าง Frontend, AI และ Database
-
-การทำงานหลักของ Backend ได้แก่:
-
-- รับ Request จาก Frontend
-- ตรวจสอบและจัดการข้อมูลที่ได้รับจาก Frontend
-- ส่งข้อมูลไปยัง AI เพื่อประมวลผล
-- รับผลลัพธ์จาก AI
-- อ่านและบันทึกข้อมูลใน Database
-- จัดการ API Endpoint ของระบบ
-- ส่งผลลัพธ์กลับไปยัง Frontend
-- จัดการ Error และ Response ของระบบ
-
-### การทำงานของระบบ
+Backend เป็นตัวกลางในการควบคุมการไหลของข้อมูลภายในระบบ
 
 โครงสร้างการทำงานหลัก:
 
 Frontend
-    ↓
+    |
+    | HTTP Request
+    v
 Backend
-    ↓
-┌───────────────┬───────────────┐
-│               │               │
-▼               ▼               ▼
-AI          Database       การประมวลผล
-│               │
-└───────┬───────┘
-        ▼
-     Backend
-        ↓
-    Frontend
+    |
+    +------------------+
+    |                  |
+    v                  v
+   AI              Database
+    |                  |
+    +--------+---------+
+             |
+             v
+          Backend
+             |
+             | HTTP Response
+             v
+          Frontend
 
-Backend ทำหน้าที่เป็นตัวกลางระหว่าง Frontend, AI และ Database
-โดย Frontend จะส่ง Request มายัง Backend
-จากนั้น Backend จะจัดการ Request และติดต่อกับ AI หรือ Database ตามความต้องการของระบบ
-ก่อนส่งผลลัพธ์กลับไปยัง Frontend
 
-### การทำงานปัจจุบัน
+Backend มีหน้าที่หลักดังนี้:
 
-ในขั้นตอนเริ่มต้น Backend มี Health Endpoint
-สำหรับตรวจสอบว่า Server สามารถทำงานและตอบ Request ได้หรือไม่
-
-Endpoint:
-
-GET /health
-
-Response:
-
-{
-  "status": "ok"
-}
-
-หากได้รับ Response ดังกล่าว แสดงว่า Backend สามารถทำงานได้ตามปกติ
+- รับข้อมูลจาก Frontend
+- ตรวจสอบข้อมูลที่ได้รับ
+- ประมวลผลข้อมูล
+- ส่งข้อมูลไปยัง AI
+- รับผลลัพธ์จาก AI
+- อ่านข้อมูลจาก Database
+- บันทึกข้อมูลลง Database
+- จัดการ API Endpoint
+- จัดการ Error
+- ส่ง Response กลับไปยัง Frontend
 
 ---
 
-## 2. ต้องลงอะไร
+# 2. บทบาทของ Backend ในระบบ
 
-### Python
+Backend จะเป็นตัวกลางระหว่างส่วนต่าง ๆ ของระบบ
 
-ใช้ Python:
+## 2.1 Frontend
 
-Python 3.10.11
+Frontend เป็นส่วนที่ผู้ใช้งานโต้ตอบกับระบบ
 
-ตรวจสอบเวอร์ชัน Python:
+Frontend จะส่ง Request มายัง Backend เช่น:
 
-python --version
+- Prompt
+- ข้อมูลผู้ใช้
+- ตัวเลือกการสร้างรูป
+- ข้อมูลที่ต้องการค้นหา
+- ข้อมูลที่ต้องการบันทึก
 
-ผลลัพธ์ที่ควรได้:
+Backend จะรับข้อมูลเหล่านี้และนำไปประมวลผลตาม Logic ของระบบ
 
-Python 3.10.11
 
-### Flask
+## 2.2 AI
 
-Backend ใช้ Flask:
+Backend จะเป็นตัวกลางในการเรียกใช้งาน AI
 
-Flask 3.1.3
+ตัวอย่างการทำงาน:
 
-Package และ Version ที่ใช้ในโปรเจกต์ถูกบันทึกไว้ใน:
+Frontend
+    |
+    | Prompt
+    v
+Backend
+    |
+    | Request
+    v
+AI
+    |
+    | Result
+    v
+Backend
+    |
+    | Response
+    v
+Frontend
 
-requirements.txt
+
+Backend ไม่ควรให้ Frontend ติดต่อ AI โดยตรง
+
+เหตุผล:
+
+- ควบคุมการเรียก AI จากจุดเดียว
+- ซ่อนรายละเอียดของ AI Server
+- จัดการ Error ได้ง่าย
+- จัดการ Timeout ได้
+- สามารถเปลี่ยน AI ในอนาคตได้ง่าย
+- สามารถบันทึกข้อมูลการใช้งานลง Database
+
+
+## 2.3 Database
+
+Backend เป็นตัวกลางในการติดต่อ Database
+
+ตัวอย่างการทำงาน:
+
+Frontend
+    |
+    | Request
+    v
+Backend
+    |
+    | Query
+    v
+Database
+    |
+    | Data
+    v
+Backend
+    |
+    | Response
+    v
+Frontend
+
+
+Backend จะเป็นผู้จัดการการอ่านและเขียนข้อมูลกับ Database
+
+Frontend ไม่ควรเชื่อมต่อ Database โดยตรง
 
 ---
 
-## 3. โครงสร้างไฟล์
+# 3. โครงสร้าง Backend
 
-โครงสร้างส่วนที่เกี่ยวข้องกับ Backend ในปัจจุบัน:
+โครงสร้างปัจจุบัน:
 
 LUMA-group11/
 │
 ├── backend/
 │   ├── README.md
+│   ├── LOGBOOK.md
 │   └── app.py
+│
+├── ai/
 │
 ├── database/
 │
 ├── frontend/
 │
-├── ai/
+├── requirements.txt
 │
 ├── venv/
 │
-├── requirements.txt
-│
 └── .gitignore
+
 
 รายละเอียด:
 
-- backend/app.py - โปรแกรมหลักของ Flask Backend
-- backend/README.md - เอกสารวิธีใช้งาน Backend
-- requirements.txt - รายการ Python Packages ที่ Backend ต้องใช้
-- venv/ - Virtual Environment สำหรับติดตั้ง Packages ของโปรเจกต์
-- .gitignore - กำหนดไฟล์หรือโฟลเดอร์ที่ไม่ต้องการให้ Git ติดตาม
+### backend/app.py
+
+ไฟล์หลักของ Flask Backend
+
+ใช้สำหรับ:
+
+- สร้าง Flask Application
+- สร้าง API Endpoint
+- รับ Request
+- ประมวลผล Request
+- ส่ง Response
+
+### backend/README.md
+
+เอกสารอธิบาย Backend
+
+### backend/LOGBOOK.md
+
+บันทึกขั้นตอนการพัฒนา Backend โดยละเอียด
+
+### requirements.txt
+
+เก็บรายการ Python Package ที่ใช้ในโปรเจกต์
+
+### venv/
+
+Virtual Environment สำหรับแยก Package ของโปรเจกต์ออกจาก Python หลักของเครื่อง
 
 ---
 
-## 4. การติดตั้ง
+# 4. เทคโนโลยีที่ใช้
 
-### 4.1 ตรวจสอบ Python
+## Python
 
-เปิด Terminal ที่โฟลเดอร์หลักของโปรเจกต์:
-
-LUMA-group11
-
-ตรวจสอบ Python:
-
-python --version
-
-ต้องเป็น:
+Version:
 
 Python 3.10.11
 
----
 
-### 4.2 สร้าง Virtual Environment
+## Flask
 
-หากยังไม่มี Virtual Environment ให้สร้างด้วย:
-
-python -m venv venv
-
-จะได้โฟลเดอร์:
-
-venv/
-
----
-
-### 4.3 เปิดใช้งาน Virtual Environment
-
-สำหรับ Windows PowerShell:
-
-.\venv\Scripts\Activate.ps1
-
-หาก PowerShell ไม่อนุญาตให้รัน Script ให้ใช้คำสั่งนี้ก่อน:
-
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
-จากนั้นเปิดใช้งานอีกครั้ง:
-
-.\venv\Scripts\Activate.ps1
-
-หากเปิดใช้งานสำเร็จ จะเห็น (venv) อยู่ด้านหน้า Terminal เช่น:
-
-(venv) PS C:\Ai gen\ProjectFN\LUMA-group11>
-
----
-
-### 4.4 ติดตั้ง Packages
-
-เมื่อเปิดใช้งาน Virtual Environment แล้ว
-ให้ติดตั้ง Packages จาก requirements.txt:
-
-pip install -r requirements.txt
-
-Packages หลักที่ใช้ในปัจจุบันคือ:
+Version:
 
 Flask 3.1.3
 
----
 
-## 5. การรัน Backend
+Flask ใช้สำหรับสร้าง Web Server และ REST API ของ Backend
 
-ต้องเปิดใช้งาน Virtual Environment ก่อนรัน Backend
 
-ตรวจสอบว่ามี (venv) อยู่หน้า Terminal:
+## Requests
 
-(venv) PS C:\Ai gen\ProjectFN\LUMA-group11>
+มีแผนจะใช้ Package `requests`
+สำหรับติดต่อกับ AI Server ที่อยู่บนเครื่องอื่น
 
-จากโฟลเดอร์หลัก LUMA-group11 ให้รัน:
-
-python backend\app.py
-
-หาก Backend ทำงานสำเร็จ จะปรากฏข้อความประมาณ:
-
-* Serving Flask app 'app'
-* Debug mode: on
-* Running on http://127.0.0.1:5000
-
-Backend จะทำงานที่:
-
-http://localhost:5000
-
-หรือ:
-
-http://127.0.0.1:5000
-
-### หยุด Backend
-
-หากต้องการหยุด Server ให้กด:
-
-Ctrl + C
+Package นี้จะติดตั้งเมื่อเริ่มพัฒนาส่วนเชื่อมต่อ AI จริง
 
 ---
 
-## 6. การทดสอบ Backend
+# 5. Environment
 
-หลังจากรัน Backend แล้ว ให้เปิด Web Browser
+Backend ใช้ Virtual Environment
 
-เข้า:
+ชื่อ:
 
-http://localhost:5000/health
+venv
 
-หรือ:
 
-http://127.0.0.1:5000/health
+เหตุผลที่ใช้ Virtual Environment:
 
-หาก Backend ทำงานถูกต้อง จะได้รับ Response:
-
-{
-  "status": "ok"
-}
-
-การได้รับ Response นี้หมายความว่า:
-
-- Flask Server เปิดทำงานสำเร็จ
-- Backend สามารถรับ Request ได้
-- /health Endpoint ทำงานได้
-- Backend สามารถส่ง Response กลับมาได้
+- แยก Package ของโปรเจกต์
+- ป้องกัน Package ชนกับโปรเจกต์อื่น
+- ทำให้สมาชิกในทีมติดตั้ง Environment เหมือนกันได้
+- สามารถใช้ requirements.txt ในการติดตั้ง Package ใหม่ได้
 
 ---
 
-## 7. Health Endpoint
+# 6. API
 
-### GET /health
+Backend จะให้บริการ API สำหรับ Frontend
 
-ใช้สำหรับตรวจสอบสถานะของ Backend
+API จะใช้ HTTP Request และ HTTP Response
 
-Request:
+ตัวอย่างรูปแบบ:
 
-GET /health
+Frontend
+    |
+    | POST /api/...
+    v
+Backend
+    |
+    | Response
+    v
+Frontend
+
+
+API จริงของระบบจะถูกกำหนดเพิ่มเติมเมื่อมีการสรุป Interface
+ระหว่าง Backend, Frontend, AI และ Database
+
+---
+
+# 7. Health Endpoint
+
+ปัจจุบัน Backend มี Endpoint สำหรับตรวจสอบ Server
+
+## GET /health
 
 URL:
 
 http://localhost:5000/health
 
+
+หน้าที่:
+
+ตรวจสอบว่า Flask Backend สามารถเปิด Server
+และตอบ Request ได้หรือไม่
+
+
 Response:
 
 {
-  "status": "ok"
+    "status": "ok"
 }
 
+
+หากได้รับ Response ดังกล่าว
+แสดงว่า Backend สามารถทำงานและตอบ Request ได้
+
 ---
 
-## 8. Git Branch
+# 8. AI Integration
 
-การพัฒนา Backend แยกออกจาก main
-โดยใช้ Git Branch:
+AI Server ที่ใช้สำหรับการพัฒนาระบบอยู่บนเครื่องอื่นใน Network
+
+ตัวอย่าง Address:
+
+http://10.192.0.232:7860
+
+
+Backend จะเรียก AI ผ่าน API:
+
+/sdapi/v1/txt2img
+
+
+ตัวอย่างการทำงาน:
+
+Frontend
+    |
+    | Prompt
+    v
+Backend
+    |
+    | POST /sdapi/v1/txt2img
+    v
+AI / Forge
+    |
+    | Base64 Image
+    v
+Backend
+    |
+    | Response
+    v
+Frontend
+
+
+---
+
+# 9. AI Configuration
+
+Backend ไม่ควร Hardcode AI เป็น:
+
+127.0.0.1
+
+
+เนื่องจาก AI Server อยู่บนเครื่องอื่น
+
+ให้กำหนดเป็น Configuration:
+
+FORGE_URL = "http://10.192.0.232:7860"
+
+
+จากนั้น Backend สามารถเรียก:
+
+f"{FORGE_URL}/sdapi/v1/txt2img"
+
+
+การแยก URL ออกจาก Logic จะช่วยให้สามารถเปลี่ยน AI Server
+ได้โดยไม่ต้องแก้ Logic หลักของระบบ
+
+---
+
+# 10. AI Request
+
+ข้อมูลที่ Backend สามารถส่งไปยัง AI ได้แก่:
+
+- prompt
+- negative_prompt
+- steps
+- width
+- height
+- cfg_scale
+- sampler_name
+
+
+ตัวอย่าง:
+
+{
+    "prompt": "a cute cat, high quality",
+    "negative_prompt": "low quality, blurry",
+    "steps": 10,
+    "width": 512,
+    "height": 512,
+    "cfg_scale": 7,
+    "sampler_name": "Euler a"
+}
+
+
+---
+
+# 11. AI Response
+
+AI จะส่งข้อมูลรูปภาพกลับมาในรูปแบบ Base64
+
+ตัวอย่างการอ่านข้อมูล:
+
+data = response.json()
+
+image_base64 = data["images"][0]
+
+
+Backend สามารถนำข้อมูลนี้ไป:
+
+- ส่งกลับ Frontend
+- บันทึกไฟล์
+- ประมวลผลเพิ่มเติม
+- บันทึกข้อมูลที่เกี่ยวข้องลง Database
+
+รายละเอียดจะขึ้นอยู่กับ Design ของระบบจริง
+
+---
+
+# 12. AI Error Handling
+
+การเรียก AI ต้องมีการจัดการ Error
+
+ตัวอย่างปัญหาที่ต้องรองรับ:
+
+- AI Server ไม่ทำงาน
+- IP ของ AI เปลี่ยน
+- Network ไม่สามารถเชื่อมต่อได้
+- Timeout
+- AI ส่ง Response ผิดรูปแบบ
+- AI ประมวลผลไม่สำเร็จ
+
+
+Backend ควรส่ง Error Response ที่ Frontend เข้าใจได้
+
+ตัวอย่าง:
+
+{
+    "error": "AI service unavailable"
+}
+
+
+---
+
+# 13. Database Integration
+
+Backend จะเป็นผู้ติดต่อ Database
+
+ข้อมูลที่อาจเกี่ยวข้องกับระบบ เช่น:
+
+- ข้อมูลผู้ใช้
+- Prompt
+- ผลลัพธ์จาก AI
+- ประวัติการสร้างรูป
+- ข้อมูลการใช้งานระบบ
+- Metadata ของรูปภาพ
+
+
+โครงสร้าง Database และชนิดของ Database
+จะกำหนดหลังจากประสานงานกับผู้รับผิดชอบ Database
+
+---
+
+# 14. Frontend Integration
+
+Frontend จะไม่ติดต่อ AI หรือ Database โดยตรง
+
+การสื่อสารหลัก:
+
+Frontend
+    |
+    | HTTP
+    v
+Backend
+    |
+    +------> AI
+    |
+    +------> Database
+
+
+ข้อดี:
+
+- ลดความซับซ้อนของ Frontend
+- รวม Business Logic ไว้ที่ Backend
+- เพิ่มความปลอดภัย
+- เปลี่ยน AI หรือ Database ได้ง่ายขึ้น
+- จัดการ Error จากจุดเดียว
+
+---
+
+# 15. การทำงานที่คาดหวังของระบบ
+
+ตัวอย่าง Workflow สำหรับการสร้างรูปภาพ:
+
+1. User กรอก Prompt ใน Frontend
+2. Frontend ส่ง Prompt ไปยัง Backend
+3. Backend ตรวจสอบข้อมูล
+4. Backend ส่ง Prompt ไปยัง AI
+5. AI สร้างรูปภาพ
+6. AI ส่งผลลัพธ์กลับ Backend
+7. Backend ประมวลผลผลลัพธ์
+8. Backend อาจบันทึกข้อมูลลง Database
+9. Backend ส่งผลลัพธ์กลับ Frontend
+10. Frontend แสดงผลให้ User
+
+Workflow:
+
+User
+  |
+  v
+Frontend
+  |
+  | Prompt
+  v
+Backend
+  |
+  v
+AI
+  |
+  | Image
+  v
+Backend
+  |
+  +----> Database
+  |
+  v
+Frontend
+  |
+  v
+User
+
+---
+
+# 16. Git Branch
+
+Backend พัฒนาบน Branch:
 
 backend
 
-ตรวจสอบ Branch ปัจจุบัน:
 
-git branch
+มี Branch ที่เกี่ยวข้อง:
 
-ควรเห็น:
+- main
+- backend
+- backend-ai
 
-* backend
-  main
 
-เครื่องหมาย * หมายถึง Branch ที่กำลังใช้งานอยู่
-
-การพัฒนา Backend ให้ทำงานบน:
-
-backend
-
-ไม่ควรพัฒนาโดยตรงบน:
+แนวทางการทำงาน:
 
 main
+    |
+    +---- backend
+              |
+              +---- backend-ai
+
+
+Backend สามารถพัฒนาบน Branch ของตัวเอง
+และ Merge เข้ากับ Branch ที่เกี่ยวข้องตาม Workflow ของทีม
 
 ---
 
-## 9. Git Workflow สำหรับ Backend
+# 17. การติดตั้ง
 
-หลังจากแก้ไขหรือเพิ่มไฟล์ Backend ให้ตรวจสอบสถานะ:
+## ตรวจสอบ Python
 
-git status
+python --version
 
-เพิ่มไฟล์ที่ต้องการ Commit:
 
-git add <ชื่อไฟล์>
+ต้องใช้:
 
-ตัวอย่าง:
+Python 3.10.11
 
-git add backend/app.py
 
-Commit:
-
-git commit -m "ข้อความอธิบายการเปลี่ยนแปลง"
-
-ตัวอย่าง:
-
-git commit -m "Add Flask health endpoint"
-
----
-
-## 10. การติดตั้ง Backend ในเครื่องใหม่
-
-หากต้องนำโปรเจกต์ไปติดตั้งในเครื่องใหม่
-ให้ทำตามขั้นตอน:
-
-### 1. เข้าโฟลเดอร์โปรเจกต์
-
-cd LUMA-group11
-
-### 2. สร้าง Virtual Environment
+## สร้าง Virtual Environment
 
 python -m venv venv
 
-### 3. เปิดใช้งาน Virtual Environment
+
+## เปิดใช้งาน Virtual Environment
 
 Windows PowerShell:
 
 .\venv\Scripts\Activate.ps1
 
-หากติดปัญหา Execution Policy:
+
+หาก PowerShell ไม่อนุญาต:
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-แล้ว:
+จากนั้น:
 
 .\venv\Scripts\Activate.ps1
 
-### 4. ติดตั้ง Packages
+
+เมื่อสำเร็จจะเห็น:
+
+(venv)
+
+
+## ติดตั้ง Package
 
 pip install -r requirements.txt
 
-### 5. รัน Backend
+---
+
+# 18. การรัน Backend
+
+จากโฟลเดอร์หลัก:
+
+LUMA-group11
+
+
+รัน:
 
 python backend\app.py
 
-### 6. ทดสอบ
+
+Backend จะเปิดที่:
+
+http://localhost:5000
+
+
+---
+
+# 19. การทดสอบ
 
 เปิด:
 
 http://localhost:5000/health
 
-หากได้:
+
+Expected Response:
 
 {
-  "status": "ok"
+    "status": "ok"
 }
 
-แสดงว่า Backend พร้อมใช้งาน
+
+หากได้รับ Response ดังกล่าว:
+
+Backend Server      PASS
+Health Endpoint     PASS
 
 ---
 
-## 11. สถานะปัจจุบัน
+# 20. สถานะการพัฒนา
 
-ปัจจุบัน Backend มีระบบพื้นฐานดังนี้:
+## Environment
 
-- [x] สร้าง Git Branch backend
-- [x] ติดตั้ง Python 3.10.11
-- [x] สร้าง Virtual Environment
-- [x] ติดตั้ง Flask 3.1.3
-- [x] สร้าง requirements.txt
-- [x] สร้าง Flask Application
-- [x] สร้าง /health Endpoint
-- [x] ทดสอบ Flask Server
+- [x] Python 3.10.11
+- [x] Git
+- [x] Virtual Environment
+- [x] Flask 3.1.3
+- [x] requirements.txt
+
+## Backend
+
+- [x] Flask Application
+- [x] Health Endpoint
+- [x] เปิด Server ได้
 - [x] ทดสอบ /health สำเร็จ
 
-ส่วนการทำงานเพิ่มเติม เช่น
+## Git
 
-- การรับข้อมูลจาก Frontend
-- API สำหรับระบบจริง
-- การเชื่อมต่อ AI
-- การเชื่อมต่อ Database
-- การจัดการข้อมูลของระบบ
+- [x] สร้าง Branch backend
+- [x] Commit requirements.txt
+- [x] Commit app.py
+- [x] Merge backend -> backend-ai
+- [x] Push backend-ai ขึ้น GitHub
+- [x] ตรวจสอบ Working Tree
 
-จะพัฒนาต่อในขั้นตอนถัดไป
+## Integration
+
+- [ ] ออกแบบ API จริง
+- [ ] เชื่อม Frontend
+- [ ] ติดตั้ง requests
+- [ ] เชื่อม AI
+- [ ] ทดสอบ AI API
+- [ ] เชื่อม Database
+- [ ] ออกแบบ Database API
+- [ ] Error Handling
+- [ ] End-to-End Testing
+
+---
+
+# 21. แนวทางการพัฒนาต่อ
+
+ขั้นตอนถัดไปของ Backend:
+
+1. ประสานงานกับ Frontend
+2. กำหนด API ที่ Frontend ต้องใช้
+3. ประสานงานกับ AI
+4. ทดสอบการเชื่อมต่อ AI Server
+5. สร้าง AI Service ใน Backend
+6. ประสานงานกับ Database
+7. สร้าง Database Service
+8. เชื่อม API ทั้งหมดเข้าด้วยกัน
+9. เพิ่ม Error Handling
+10. ทดสอบระบบแบบ End-to-End
 
 ---
 
-## 12. หมายเหตุ
+# 22. หลักการสำคัญ
 
-Backend ปัจจุบันใช้ Flask Development Server
-สำหรับการพัฒนาและทดสอบภายในเครื่อง
+Backend ควรทำหน้าที่เป็นตัวกลางของระบบ
 
-Development Server ไม่ควรใช้สำหรับ Production Deployment
+Frontend
+    |
+    v
+Backend
+    |
+    +---- AI
+    |
+    +---- Database
 
-เมื่อระบบพัฒนาเสร็จและมีการ Deploy จริง
-ควรเปลี่ยนไปใช้ Production WSGI Server
-และตั้งค่าที่เหมาะสมกับระบบจริง
 
----
+ไม่ควรให้ Frontend ติดต่อ AI หรือ Database โดยตรง
+หากไม่จำเป็นต่อ Architecture ของระบบ
+
+การออกแบบ API และโครงสร้าง Backend จริง
+จะปรับตามข้อกำหนดของระบบและการตกลงร่วมกันของสมาชิกทีม
