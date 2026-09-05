@@ -1,67 +1,43 @@
 # Database
 
-ส่วนนี้เป็นงานของผู้รับผิดชอบ Database
-
-README นี้เป็นตัวอย่างสำหรับบันทึกวิธีใช้งานของส่วนนี้
-ให้แก้ข้อมูลให้ตรงกับงานจริงเมื่อเริ่มพัฒนา
+ส่วนนี้เป็นงานของผู้รับผิดชอบ Database สำหรับโปรเจกต์ LUMA
 
 ## 1. ส่วนนี้ทำอะไร
 
-ตัวอย่าง:
+เก็บข้อมูลที่ใช้ในระบบ LUMA เพื่อใช้เป็นฐานข้อมูลและคิวงาน (Job Queue) ระหว่าง Backend และ AI เช่น:
 
-เก็บข้อมูลที่ใช้ในระบบ LUMA เช่น
-
-- ข้อมูลผู้ใช้
-- ประวัติการใช้งาน
-- Prompt
-- ผลการประมวลผล
+- ข้อมูลผู้ใช้ (ชื่อ, อีเมล, รหัสผ่าน)
+- สถานะคิวงานประมวลผลภาพ (Pending, Processing, Completed, Failed)
+- Prompt ที่ใช้สั่งสร้างรูป
+- Path ของไฟล์รูปภาพต้นฉบับและไฟล์ผลลัพธ์
 
 ## 2. ต้องลงอะไร
-
-ตัวอย่าง:
 
 - PostgreSQL
 - pgAdmin
 
 ## 3. ติดตั้งและสร้าง Database
 
-ตัวอย่าง:
-
 1. ติดตั้ง PostgreSQL
 2. เปิด pgAdmin
 3. สร้าง Database ชื่อ:
 
-```text
 luma
-```
 
-4. ถ้ามีไฟล์ SQL เช่น:
 
-```text
-init.sql
-```
+ในโฟลเดอร์จะมีไฟล์ SQL ชื่อ: init.sql
 
-ให้เปิดและ Execute ไฟล์นั้น
+ทดสอบ
+เปิด Query Tool แล้วลองเพิ่มข้อมูล (INSERT):
 
-## 4. ทดสอบ
+INSERT INTO users (username, email, password_hash)
+VALUES ('test_user', 'test@email.com', 'hashed_1234');
 
-ตัวอย่าง:
+INSERT INTO image_tasks (user_id, task_type, status, prompt_text)
+VALUES (1, 'generate', 'pending', 'แมวอวกาศสีชมพู');
 
-ลองเพิ่มข้อมูล:
 
-```sql
-INSERT INTO test_table (name)
-VALUES ('LUMA Test');
-```
+## แล้วลองอ่านข้อมูล (SELECT):
 
-แล้วลองอ่านข้อมูล:
-
-```sql
-SELECT * FROM test_table;
-```
-
-ถ้าสามารถ INSERT และ SELECT ได้ ถือว่า Database ทำงานสำเร็จ
-
----
-
-เมื่อเริ่มพัฒนาจริง ให้แก้ README นี้ให้ตรงกับชื่อ Database, Table และวิธีติดตั้งของจริง
+- SELECT * FROM users;
+- SELECT * FROM image_tasks;
