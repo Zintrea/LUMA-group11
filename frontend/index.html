@@ -13,28 +13,35 @@
   <nav class="navbar navbar-expand-lg topbar px-3 py-2 navbar-dark">
     <div class="container-fluid p-0">
       <a class="navbar-brand text-white fw-bold me-4" href="#"><i class="bi bi-stars text-primary"></i> LUMA</a>
+      
       <div class="d-flex align-items-center ms-auto">
         <span class="text-secondary small me-3"><i class="bi bi-person-circle me-1"></i> User</span>
-        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Logout</button>
+        <a href="auth.html" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
       </div>
     </div>
   </nav>
 
   <div class="container-fluid p-0">
     <div class="row g-0">
-      <!-- ซ้าย: พื้นที่ตั้งค่า Prompt -->
+      
       <div class="col-md-4 col-lg-3 sidebar p-4">
         <h6 class="text-uppercase text-muted fw-bold mb-3 small">1. Prompt Engineering</h6>
+        
         <div class="mb-3">
           <label for="promptInput" class="form-label small text-light">Prompt</label>
           <textarea class="form-control bg-dark text-light border-secondary" id="promptInput" rows="4" placeholder="e.g., A cute cat sitting on a wooden table, 4k resolution..."></textarea>
           <div class="invalid-feedback">Please enter a prompt before generating.</div>
         </div>
+        
         <div class="mb-4">
           <label for="negativePromptInput" class="form-label small text-muted">Negative Prompt</label>
           <textarea class="form-control bg-dark text-light border-secondary" id="negativePromptInput" rows="3" placeholder="e.g., ugly, blurry, low resolution..."></textarea>
         </div>
+        
         <hr class="border-secondary">
+        
         <h6 class="text-uppercase text-muted fw-bold mb-3 small">2. Model Settings</h6>
         <div class="mb-4">
           <label class="form-label small text-muted">AI Model (Checkpoint)</label>
@@ -43,12 +50,13 @@
             <option value="anime">Anime / 2D Art</option>
           </select>
         </div>
+        
         <hr class="border-secondary">
+        
         <h6 class="text-uppercase text-muted fw-bold mb-3 small">3. Action</h6>
         <button id="btnGenerate" class="btn btn-primary w-100 fw-bold py-2"><i class="bi bi-magic me-1"></i> Generate Image</button>
       </div>
 
-      <!-- ขวา: พื้นที่แสดงรูปภาพ -->
       <div class="col-md-8 col-lg-9 workspace">
         <div id="imageResultContainer">
           <span id="emptyState" class="text-muted"><i class="bi bi-image me-1"></i> AI generated image will appear here</span>
@@ -60,11 +68,11 @@
           <img id="resultImage" class="d-none" src="" alt="Generated AI Image">
         </div>
       </div>
+      
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- เปลี่ยนไปเรียกไฟล์ script.js แทน -->
   <script src="js/script.js"></script>
 </body>
 </html>
