@@ -1,5 +1,5 @@
 // กำหนด URL ของ Backend (รอแก้ตามที่ Backend/DevOps แจ้งมา)
-const BACKEND_URL = 'http://10.192.0.167:5000/generate'; 
+const BACKEND_URL = '/api/generate'; 
 
 const btnGenerate = document.getElementById('btnGenerate');
 const promptInput = document.getElementById('promptInput');
