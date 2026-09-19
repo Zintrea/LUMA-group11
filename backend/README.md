@@ -1,4 +1,9 @@
 LUMA Group 11 — Backend AI
+เข้ามาต้องเปลี่ยน IP Ai ที่App.py และ Env
+และเปลี่ยน IP Database ที่ตรง env
+
+
+
 
 1. ภาพรวม
 

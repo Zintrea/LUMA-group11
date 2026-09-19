@@ -32,7 +32,7 @@ CORS(app)
 
 FORGE_URL = os.getenv(
     "FORGE_URL",
-    "http://10.192.0.232:7860"
+    "http://10.192.1.91:7860"
 )
 
 DATABASE_HOST = os.getenv("DATABASE_HOST")
