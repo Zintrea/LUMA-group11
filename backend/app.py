@@ -499,60 +499,25 @@ def register():
 
 @app.route("/auth/login", methods=["POST"])
 def login():
-
-    # -------------------------------------
-    # รับข้อมูล
-    # -------------------------------------
-
     data = request.get_json(silent=True)
 
-    if not data:
-
-        return jsonify({
-            "status": "error",
-            "message": "Request body is required"
-        }), 400
-
-
-    email = str(data.get("email", "")).strip().lower()
+    username = str(data.get("username", "")).strip()
     password = str(data.get("password", ""))
 
-
-    # -------------------------------------
-    # ตรวจข้อมูล
-    # -------------------------------------
-
-    if not email:
-
+    if not username or not password:
         return jsonify({
-            "status": "error",
-            "message": "email is required"
+            "message": "username and password are required",
+            "status": "error"
         }), 400
-
-
-    if not password:
-
-        return jsonify({
-            "status": "error",
-            "message": "password is required"
-        }), 400
-
 
     conn = None
     cur = None
 
     try:
-
         conn = get_db_connection()
         cur = conn.cursor()
 
-
-        # -------------------------------------
-        # ค้นหา User
-        # -------------------------------------
-
-        cur.execute(
-            """
+        cur.execute("""
             SELECT
                 id,
                 username,
@@ -562,165 +527,87 @@ def login():
                 is_active,
                 created_at
             FROM users
-            WHERE email = %s;
-            """,
-            (email,)
-        )
+            WHERE username = %s
+        """, (username,))
 
         user = cur.fetchone()
 
-
-        # -------------------------------------
-        # ไม่พบ User
-        # -------------------------------------
-
         if not user:
-
             return jsonify({
-
-                "status": "error",
-
-                "message": "Invalid email or password"
-
+                "message": "Invalid username or password",
+                "status": "error"
             }), 401
 
-
-        user_id = user[0]
-        username = user[1]
-        user_email = user[2]
-        stored_password_hash = user[3]
-        role = user[4]
-        is_active = user[5]
-        created_at = user[6]
-
-
-        # -------------------------------------
-        # ตรวจ Account
-        # -------------------------------------
+        (
+            user_id,
+            username,
+            email,
+            password_hash,
+            role,
+            is_active,
+            created_at
+        ) = user
 
         if not is_active:
-
             return jsonify({
-
-                "status": "error",
-
-                "message": "Account is inactive"
-
+                "message": "User account is inactive",
+                "status": "error"
             }), 403
 
-
-        # -------------------------------------
-        # ตรวจ Password
-        # -------------------------------------
-
+        # ตรวจสอบ Password
         password_valid = False
 
         try:
-
             password_valid = check_password_hash(
-                stored_password_hash,
+                password_hash,
                 password
             )
-
-        except (ValueError, TypeError):
-
+        except Exception:
             password_valid = False
 
+        # รองรับ User เก่าที่เก็บ Password เป็น Plain Text
+        if not password_valid and password_hash == password:
 
-        # -------------------------------------
-        # รองรับข้อมูลเก่า
-        #
-        # ถ้า Database เดิมยังเก็บ Password
-        # แบบ Plain Text สำหรับข้อมูลทดสอบ
-        #
-        # Login สำเร็จแล้วจะ Hash ใหม่ทันที
-        # -------------------------------------
+            new_hash = generate_password_hash(password)
 
-        if not password_valid:
+            cur.execute("""
+                UPDATE users
+                SET password_hash = %s
+                WHERE id = %s
+            """, (new_hash, user_id))
 
-            if stored_password_hash == password:
+            conn.commit()
 
-                password_valid = True
-
-                new_password_hash = generate_password_hash(
-                    password
-                )
-
-                cur.execute(
-                    """
-                    UPDATE users
-                    SET password_hash = %s
-                    WHERE id = %s;
-                    """,
-                    (
-                        new_password_hash,
-                        user_id
-                    )
-                )
-
-                conn.commit()
-
-
-        # -------------------------------------
-        # Password ผิด
-        # -------------------------------------
+            password_valid = True
 
         if not password_valid:
-
             return jsonify({
-
-                "status": "error",
-
-                "message": "Invalid email or password"
-
+                "message": "Invalid username or password",
+                "status": "error"
             }), 401
 
-
-        # -------------------------------------
-        # Login สำเร็จ
-        # -------------------------------------
-
         return jsonify({
-
-            "status": "ok",
-
             "message": "Login successful",
-
+            "status": "success",
             "user": {
-
                 "id": user_id,
-
                 "username": username,
-
-                "email": user_email,
-
+                "email": email,
                 "role": role,
-
                 "is_active": is_active,
-
-                "created_at": (
-                    created_at.isoformat()
-                    if created_at
-                    else None
-                )
+                "created_at": created_at.isoformat()
             }
-
         }), 200
 
-
-    except Exception as error:
+    except Exception as e:
 
         if conn:
             conn.rollback()
 
         return jsonify({
-
-            "status": "error",
-
-            "message": str(error)
-
+            "message": str(e),
+            "status": "error"
         }), 500
-
 
     finally:
 
@@ -729,8 +616,7 @@ def login():
 
         if conn:
             conn.close()
-
-
+            
 # =========================================
 # GENERATE
 # FRONTEND → BACKEND → DATABASE → FORGE
