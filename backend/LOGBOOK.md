@@ -1,15 +1,11 @@
 LUMA Group 11 — Backend AI LOGBOOK
-
 Project
-
 LUMA Group 11
 
 Role
-
 Backend-AI
 
 Main Responsibility
-
 พัฒนา Backend สำหรับเป็นตัวกลางระหว่าง:
 
 Frontend
@@ -17,98 +13,73 @@ Frontend
 Backend
    ├── PostgreSQL
    └── Forge AI
-
 Phase 1 — เริ่มต้น Repository และ Branch
-
 งาน
-
 เริ่มแยกงาน Backend ออกจาก branch หลักของทีม
 
 สร้าง branch:
 
 git switch -c backend
-
 ต่อมางาน Backend-AI ใช้ branch:
 
 backend-ai
-
 มีการ Merge งาน Backend เข้ากับ backend-ai และ Push ขึ้น Remote
 
 Phase 2 — ตั้งค่า Python
-
 ตรวจสอบ Python
-
 โปรเจกต์ใช้ Python 3.10
 
 ตรวจสอบ:
 
 python --version
-
 ผลที่ใช้:
 
 Python 3.10.11
-
 Phase 3 — สร้าง Virtual Environment
-
 เข้าโปรเจกต์:
 
 cd "C:\Ai gen\ProjectFN\LUMA-group11"
-
 สร้าง:
 
 python -m venv venv
-
 เปิดใช้งาน PowerShell:
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\venv\Scripts\Activate.ps1
-
 ผล:
 
 (venv)
-
 Phase 4 — ติดตั้ง Flask
-
 ติดตั้ง:
 
 pip install flask
-
 ตรวจสอบ Flask:
 
 python -c "import flask; print(flask.__version__)"
-
 เวอร์ชันที่ใช้ระหว่างพัฒนา:
 
 Flask 3.1.3
-
 Phase 5 — สร้าง Backend ตัวแรก
-
 สร้าง:
 
 backend/app.py
-
 เริ่มจาก Health API:
 
 GET /health
-
 Response:
 
 {
   "status": "ok"
 }
-
 ทดสอบสำเร็จ
 
 Phase 6 — ติดตั้ง Packages ที่ต้องใช้
-
 ติดตั้ง:
 
 pip install flask requests psycopg2-binary python-dotenv flask-cors
-
 สร้าง:
 
 pip freeze > requirements.txt
-
 Packages ที่เกี่ยวข้อง:
 
 flask
@@ -116,92 +87,77 @@ requests
 psycopg2-binary
 python-dotenv
 flask-cors
-
 Phase 7 — เชื่อม Forge AI
-
 กำหนด Forge URL สำหรับการพัฒนา:
 
 http://10.192.0.232:7860
-
 ตรวจสอบ Network:
 
 Test-NetConnection 10.192.0.232 -Port 7860
-
 ผล:
 
 TcpTestSucceeded : True
+หมายเหตุ: IP นี้เป็นค่าที่ใช้ในช่วงแรกของการพัฒนา ต่อมามีการเปลี่ยน Network/IP ของทีม และค่าปัจจุบันถูกกำหนดใน backend/.env
 
 Phase 8 — ทดสอบ Forge
-
 สร้างโปรแกรมทดสอบส่ง Prompt ไป:
 
 POST /sdapi/v1/txt2img
-
 ได้รับภาพกลับมาเป็น Base64
 
 จากนั้นบันทึกภาพทดสอบเป็น:
 
 forge_test.png
-
 ผล:
 
 Backend machine → Forge AI → image
-
 สำเร็จ
 
 Phase 9 — เชื่อม PostgreSQL
-
 Database Server:
 
 192.168.1.137
-
 Port:
 
 5432
-
 ค่าที่ใช้ระหว่างการพัฒนา:
 
 DATABASE_HOST=192.168.1.137
 DATABASE_PORT=5432
 DATABASE_NAME=postgres
 DATABASE_USER=postgres
-
 Password เก็บไว้ใน .env
 
 Phase 10 — แก้ปัญหา Environment
-
 ช่วงแรก Backend ยังโหลด Environment ไม่ตรงตำแหน่ง
 
 จึงกำหนด:
 
 BASE_DIR = Path(__file__).resolve().parent
-ENV_FILE = BASE_DIR / ".env"
-load_dotenv(ENV_FILE)
 
+ENV_FILE = BASE_DIR / ".env"
+
+load_dotenv(ENV_FILE)
 ทำให้ Backend โหลด:
 
 backend/.env
-
 ตรวจสอบได้:
 
 ENV exists: True
+
 Database Host: 192.168.1.137
 Database Port: 5432
 Database Name: postgres
 Database User: postgres
 Database Password exists: True
 Forge URL: http://10.192.0.232:7860
-
 Phase 11 — สร้าง /db-health
-
 สร้าง:
 
 GET /db-health
-
 ใช้ SQL:
 
 SELECT 1;
-
 ผลการทดสอบ:
 
 {
@@ -209,20 +165,16 @@ SELECT 1;
   "database": "connected",
   "result": 1
 }
-
 สรุป:
 
 Backend → PostgreSQL = สำเร็จ
-
 Phase 12 — ตรวจสอบ Database Schema ของทีม
-
 ได้รับ database/init.sql ของเพื่อน
 
 พบว่า Database มี:
 
 users
 image_tasks
-
 image_tasks มี:
 
 id
@@ -234,24 +186,19 @@ input_image_path
 output_image_path
 created_at
 updated_at
-
 ดังนั้น Prompt จาก Frontend จะเก็บใน:
 
 image_tasks.prompt_text
-
 งาน Generate ใช้:
 
 task_type = generate
-
 Status:
 
 pending
 processing
 completed
 failed
-
 Phase 13 — เพิ่ม Database ใน /generate
-
 ปรับ /generate ให้ทำงาน:
 
 รับ Prompt
@@ -269,13 +216,10 @@ processing
 completed
    ↓
 ส่งกลับ Frontend
-
 หากเกิด Error:
 
 status = failed
-
 Phase 14 — ทดสอบ /generate
-
 ใช้ PowerShell:
 
 $body = @{
@@ -288,21 +232,17 @@ Invoke-RestMethod `
     -Method POST `
     -ContentType "application/json" `
     -Body $body
-
 ผลการทดสอบ:
 
 image
 -----
 iVBORw0KGgo...
-
 ได้รับ Base64 image กลับมา
 
 สรุป:
 
 Prompt → Backend → Forge → Backend = สำเร็จ
-
 Phase 15 — Frontend Integration
-
 Frontend ถูกตั้งค่าให้เรียก Backend ผ่าน IP ของเครื่อง Backend
 
 ไม่ใช้ localhost สำหรับเครื่อง Client ใน LAN
@@ -318,37 +258,29 @@ Forge AI
 Backend
    ↓
 Frontend
-
 ผล:
 
 Generate ภาพจาก Frontend ได้
 แสดงภาพบน Frontend ได้
-
 Phase 16 — Prompt Storage
-
 เพิ่มการบันทึก Prompt ลง:
 
 image_tasks.prompt_text
-
 พร้อม:
 
 user_id
 task_type
 status
-
 ตัวอย่าง:
 
-user_id    = 1
-task_type  = generate
-status     = pending
+user_id     = 1
+task_type   = generate
+status      = pending
 prompt_text = "แมวใส่แว่น..."
-
 หลัง Forge สำเร็จ:
 
 status = completed
-
 Phase 17 — ตรวจสอบ Database
-
 SQL สำหรับตรวจสอบ:
 
 SELECT
@@ -361,146 +293,445 @@ SELECT
     updated_at
 FROM image_tasks
 ORDER BY id DESC;
-
 เป้าหมาย:
 
 Prompt ที่ Frontend ส่ง
-ต้องปรากฏใน image_tasks.prompt_text
+        ↓
+image_tasks.prompt_text
+ต้องปรากฏข้อมูลที่ถูกต้องใน Database
+
+Phase 18 — เพิ่ม Health Check สำหรับ AI
+เพิ่ม Endpoint:
+
+GET /ai-health
+ใช้สำหรับตรวจสอบการเชื่อมต่อ:
+
+Backend → Forge AI
+Backend เรียก Forge:
+
+GET /sdapi/v1/sd-models
+และกำหนด Timeout สำหรับการตรวจสอบ
+
+ทดสอบ:
+
+curl.exe http://localhost:5000/ai-health
+หาก Forge สามารถตอบกลับได้:
+
+Backend → Forge AI = สำเร็จ
+Phase 19 — เพิ่ม /ready สำหรับตรวจสอบความพร้อมของ Backend
+เพิ่ม Endpoint:
+
+GET /ready
+จุดประสงค์คือใช้ตรวจสอบว่า Backend พร้อมให้ระบบอื่นใช้งานหรือไม่
+
+/ready ตรวจสอบ:
+
+Backend
+   ├── Backend status
+   ├── Forge AI
+   └── PostgreSQL
+ทดสอบ:
+
+curl.exe http://localhost:5000/ready
+เมื่อทุกระบบพร้อม Response จะมีลักษณะ:
+
+{
+  "status": "ready",
+  "backend": "ok",
+  "ai": "ok",
+  "database": "ok"
+}
+หาก AI หรือ Database มีปัญหา จะตอบสถานะ 503 และระบุว่า Backend ยังไม่พร้อม
+
+สรุป:
+
+/health    → ตรวจ Backend
+/ai-health → ตรวจ Forge AI
+/db-health → ตรวจ Database
+/ready     → ตรวจความพร้อมทั้งหมด
+Phase 20 — เพิ่ม Authentication
+เพิ่มระบบ Authentication สำหรับผู้ใช้
+
+Routes ใหม่:
+
+POST /auth/register
+POST /auth/login
+ระบบ Authentication เชื่อมต่อกับตาราง:
+
+users
+โดยใช้ข้อมูล:
+
+id
+username
+email
+password_hash
+created_at
+role
+is_active
+Phase 21 — เพิ่ม /auth/register
+สร้าง:
+
+POST /auth/register
+Request:
+
+{
+  "username": "testuser01",
+  "email": "testuser01@example.com",
+  "password": "123456"
+}
+การทำงาน:
+
+รับ username / email / password
+        ↓
+ตรวจสอบข้อมูล
+        ↓
+ตรวจสอบ username ซ้ำ
+        ↓
+ตรวจสอบ email ซ้ำ
+        ↓
+Hash Password
+        ↓
+INSERT users
+        ↓
+role = user
+        ↓
+is_active = true
+Password ถูก Hash ด้วย:
+
+generate_password_hash(password)
+ก่อนบันทึกลง Database
+
+Backend ไม่ส่ง password_hash กลับไปใน Response
+
+Phase 22 — ทดสอบ /auth/register
+ทดสอบด้วย PowerShell:
+
+curl.exe -X POST http://localhost:5000/auth/register -H "Content-Type: application/json" -d '{\"username\":\"testuser01\",\"email\":\"testuser01@example.com\",\"password\":\"123456\"}'
+ผลการทดสอบ:
+
+Register สำเร็จ
+จากนั้นตรวจสอบ Database:
+
+SELECT
+    id,
+    username,
+    email,
+    password_hash,
+    role,
+    is_active,
+    created_at
+FROM users
+ORDER BY id DESC;
+ตรวจสอบว่า User ใหม่มี:
+
+role = user
+is_active = true
+และ password_hash เป็น Hash ไม่ใช่ Password แบบ Plain Text
+
+Phase 23 — เพิ่ม /auth/login
+สร้าง:
+
+POST /auth/login
+Request:
+
+{
+  "email": "testuser01@example.com",
+  "password": "123456"
+}
+การทำงาน:
+
+รับ email / password
+        ↓
+ค้นหา users
+        ↓
+ตรวจสอบ password
+        ↓
+ตรวจสอบ is_active
+        ↓
+Login สำเร็จ
+ใช้:
+
+check_password_hash(stored_password_hash, password)
+สำหรับตรวจสอบ Password
+
+Login สำเร็จจะส่งข้อมูล User กลับมาโดยไม่ส่ง Password หรือ Password Hash
+
+Phase 24 — ทดสอบ /auth/login
+ทดสอบด้วย PowerShell:
+
+curl.exe -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{\"email\":\"testuser01@example.com\",\"password\":\"123456\"}'
+ผลการทดสอบ:
+
+Login สำเร็จ
+ทดสอบ Password ผิดด้วย:
+
+curl.exe -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{\"email\":\"testuser01@example.com\",\"password\":\"wrong123\"}'
+ควรได้:
+
+HTTP 401
+Invalid email or password
+Phase 25 — ตรวจสอบ Routes ปัจจุบัน
+หลังเพิ่ม Authentication Backend มี Routes ทั้งหมด 7 Routes:
+
+GET  /health
+GET  /ai-health
+GET  /db-health
+GET  /ready
+
+POST /auth/register
+POST /auth/login
+
+POST /generate
+แบ่งเป็น:
+
+Health Check
+GET /health
+GET /ai-health
+GET /db-health
+GET /ready
+Authentication
+POST /auth/register
+POST /auth/login
+AI Generation
+POST /generate
+Phase 26 — ตรวจสอบ Backend ก่อนใช้งาน
+กำหนดขั้นตอนสำหรับเปิด Backend และตรวจสอบความพร้อมก่อนใช้งาน
+
+1. เข้า Project
+cd "C:\Ai gen\ProjectFN\LUMA-group11"
+2. เปิด venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
+3. ตรวจ Python
+python --version
+ควรเป็น:
+
+Python 3.10.11
+4. ตรวจ Forge Network
+ค่าปัจจุบันที่ใช้ใน Network ใหม่:
+
+10.192.1.91:7860
+ทดสอบ:
+
+Test-NetConnection 10.192.1.91 -Port 7860
+5. ตรวจ Database Network
+ค่าปัจจุบันที่ใช้ใน Network ใหม่:
+
+10.192.1.3:5432
+ทดสอบ:
+
+Test-NetConnection 10.192.1.3 -Port 5432
+6. เปิด Backend
+python backend\app.py
+7. ตรวจ Backend
+เปิด PowerShell อีกหน้าต่าง:
+
+curl.exe http://localhost:5000/health
+8. ตรวจ AI
+curl.exe http://localhost:5000/ai-health
+9. ตรวจ Database
+curl.exe http://localhost:5000/db-health
+10. ตรวจความพร้อมทั้งหมด
+curl.exe http://localhost:5000/ready
+ถ้าได้:
+
+{
+  "status": "ready",
+  "backend": "ok",
+  "ai": "ok",
+  "database": "ok"
+}
+ถือว่า Backend พร้อมใช้งาน
+
+Phase 27 — ปรับ Environment สำหรับ Network ปัจจุบัน
+ระหว่างการพัฒนามีการเปลี่ยน IP ของเครื่องใน LAN
+
+ค่าที่ใช้ในช่วงแรก:
+
+Forge:
+10.192.0.232:7860
+
+Database:
+192.168.1.137:5432
+ค่าที่ใช้ใน Network ปัจจุบัน:
+
+Forge:
+10.192.1.91:7860
+
+Database:
+10.192.1.3:5432
+จึงกำหนดค่าปัจจุบันใน:
+
+backend/.env
+เป็น:
+
+FORGE_URL=http://10.192.1.91:7860
+
+DATABASE_HOST=10.192.1.3
+DATABASE_PORT=5432
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+DATABASE_PASSWORD=<PRIVATE>
+Password ไม่บันทึกลง Git หรือเอกสาร
+
+Phase 28 — ตรวจสอบ Backend Code และ Error
+มีการตรวจสอบ Syntax ของ app.py ก่อนรัน Backend
+
+คำสั่ง:
+
+python -m py_compile backend\app.py
+หากไม่มี Output และไม่มี Error แสดงว่า Python Syntax ผ่าน
+
+จากนั้นจึงเปิด Backend:
+
+python backend\app.py
+Phase 29 — ตรวจสอบ Authentication กับ Database
+ทดสอบ Flow:
+
+POST /auth/register
+        ↓
+users
+        ↓
+password_hash
+        ↓
+POST /auth/login
+        ↓
+check_password_hash()
+        ↓
+Login สำเร็จ
+ตรวจสอบข้อมูล User:
+
+SELECT
+    id,
+    username,
+    email,
+    role,
+    is_active,
+    created_at
+FROM users
+ORDER BY id DESC;
+ไม่ควรแสดง Password จริงใน Query หรือ Log
+
+Phase 30 — ขอบเขตงาน Authentication ปัจจุบัน
+Authentication ที่ทำเสร็จใน Backend ปัจจุบัน:
+
+Register       ✅
+Login          ✅
+Password Hash  ✅
+Check Password ✅
+Role = user    ✅
+is_active      ✅
+Duplicate Check ✅
+สิ่งที่ยังไม่ได้ทำ:
+
+JWT / Token Authentication  ⬜
+Protected Routes            ⬜
+Logout / Token Revocation   ⬜
+การเพิ่ม JWT/Token จะทำเมื่อทีมกำหนดรูปแบบ Authentication Contract กับ Frontend เรียบร้อยแล้ว
 
 Current Status
-
-รายการ
-
-สถานะ
-
-Repository / Branch
-
-✅
-
-Python 3.10
-
-✅
-
-Virtual Environment
-
-✅
-
-Flask
-
-✅
-
-requirements.txt
-
-✅
-
-/health
-
-✅
-
-.env
-
-✅
-
-Forge Network
-
-✅
-
-Forge Generate Test
-
-✅
-
-PostgreSQL Connection
-
-✅
-
-/db-health
-
-✅
-
-/generate
-
-✅
-
-Frontend → Backend
-
-✅
-
-Backend → Forge
-
-✅
-
-Forge → Backend
-
-✅
-
-Backend → Frontend
-
-✅
-
-Prompt → PostgreSQL
-
-✅ Implemented
-
-Image Storage
-
-⬜
-
+รายการ	สถานะ
+Repository / Branch	✅
+Python 3.10	✅
+Virtual Environment	✅
+Flask	✅
+requirements.txt	✅
+/health	✅
+/ai-health	✅
+/db-health	✅
+/ready	✅
+.env	✅
+Forge Network	✅
+Forge Generate Test	✅
+PostgreSQL Connection	✅
+/generate	✅
+/auth/register	✅
+/auth/login	✅
+Frontend → Backend	✅
+Backend → Forge	✅
+Forge → Backend	✅
+Backend → Frontend	✅
+Prompt → PostgreSQL	✅ Implemented
+Password Hashing	✅
+User Registration	✅
+User Login	✅
+Image Storage	⬜
+JWT / Token Authentication	⬜
 ปัญหาที่พบและการแก้ไข
-
 1. PowerShell ไม่อนุญาต Activate.ps1
-
 แก้ด้วย:
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
 จากนั้น:
 
 .\venv\Scripts\Activate.ps1
-
 2. Python Version ไม่ตรง
-
 เครื่องมี Python หลายเวอร์ชัน
 
 โปรเจกต์ใช้:
 
 Python 3.10.11
-
-จึงใช้ python ที่ชี้ไปยัง Python 3.10 แทนการใช้ py ที่อาจชี้ไปยังเวอร์ชันอื่น
+จึงใช้ python ที่ชี้ไปยัง Python 3.10 ของ Project แทนการใช้ py ที่อาจชี้ไปยังเวอร์ชันอื่น
 
 3. Database เชื่อมต่อ localhost ผิดเครื่อง
+แก้ DATABASE_HOST ให้ชี้ไปยัง Database Server
 
-แก้ DATABASE_HOST ให้ชี้ไปยัง Database Server:
+ในช่วงแรก:
 
 192.168.1.137
+ต่อมามีการเปลี่ยน Network เป็น:
 
-และใช้ .env
+10.192.1.3
+และใช้ .env เป็นตัวกำหนดค่า
 
 4. .env ไม่ถูกโหลด
-
 แก้ให้โหลดจาก:
 
 backend/.env
+โดยใช้:
 
-โดยใช้ Path(__file__).resolve().parent
-
+Path(__file__).resolve().parent
 หลังแก้ไข:
 
 ENV exists: True
 PASSWORD exists: True
-
 5. Forge เชื่อมต่อไม่ได้
-
-ตรวจสอบด้วย:
+ในช่วงแรกตรวจสอบด้วย:
 
 Test-NetConnection 10.192.0.232 -Port 7860
-
 เมื่อได้:
 
 TcpTestSucceeded : True
+จึงทดสอบ:
 
-จึงทดสอบ /sdapi/v1/txt2img
+/sdapi/v1/txt2img
+ต่อมามีการเปลี่ยน Network/IP และใช้:
+
+Test-NetConnection 10.192.1.91 -Port 7860
+6. ต้องการตรวจสอบความพร้อมของระบบก่อนใช้งาน
+เพิ่ม:
+
+/ai-health
+/db-health
+/ready
+ทำให้สามารถแยกตรวจสอบ:
+
+Backend
+Forge AI
+PostgreSQL
+และใช้ /ready ตรวจสอบภาพรวมก่อนเริ่มใช้งาน
+
+7. ต้องการเพิ่มระบบ Login/Register
+เพิ่ม:
+
+/auth/register
+/auth/login
+โดยใช้ตาราง users
+
+Password สำหรับ User ใหม่ถูก Hash ก่อนบันทึก
 
 Next Steps
+งานที่ควรดำเนินการต่อ:
 
 ตรวจสอบว่า Prompt ถูกบันทึกใน image_tasks จริง
 
@@ -510,48 +741,124 @@ Next Steps
 
 หากทีมต้องการ ให้ทำ Image Storage และบันทึก output_image_path
 
-Sync branch กับ devops
+กำหนด Authentication Contract กับ Frontend
+
+หากต้องการระบบ Session/Token ให้เพิ่ม JWT/Token Authentication
+
+ปรับ /generate ให้ใช้ User ที่ผ่าน Authentication แทนการรับ user_id จาก Client โดยตรง
+
+ตรวจสอบ Foreign Key ของ image_tasks.user_id → users.id
+
+Sync branch กับ DevOps
 
 Commit
 
 Push backend-ai
 
 Integration กับทีม
-
 Git ก่อนส่ง Integration
-
 git fetch origin
-git switch backend-ai
-git pull origin backend-ai
-git merge origin/devops
 
+git switch backend-ai
+
+git pull origin backend-ai
+
+git merge origin/devops
 ตรวจสอบ:
 
 git status
-
 เพิ่มไฟล์:
 
 git add backend/app.py backend/README.md backend/LOGBOOK.md requirements.txt .gitignore
-
 Commit:
 
-git commit -m "complete backend ai integration"
-
+git commit -m "update backend ai and authentication"
 Push:
 
 git push origin backend-ai
+หากเกิด non-fast-forward:
+
+git pull --rebase origin backend-ai
+git push origin backend-ai
+ไม่ควรใช้ Force Push กับ Branch ที่ทำงานร่วมกับทีมโดยไม่ได้ตกลงกับทีม
 
 Security Note
-
 ห้าม commit:
 
 backend/.env
-
 และห้ามใส่ Database Password จริงใน:
 
 README.md
 LOGBOOK.md
 Git
 GitHub
-
+Discord
+Source Code
 หาก Credential เคยถูกเผยแพร่โดยไม่ตั้งใจ ควรเปลี่ยน Credential ก่อนใช้งานจริง
+
+Final Backend Flow
+                         LUMA Group 11
+                              │
+                              ▼
+                         Frontend
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+        /auth/register                 /auth/login
+                │                           │
+                └─────────────┬─────────────┘
+                              ▼
+                       Flask Backend
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+                    ▼                   ▼
+               PostgreSQL           Forge AI
+                    │                   │
+               users /              txt2img
+             image_tasks               │
+                    │                   │
+                    └─────────┬─────────┘
+                              ▼
+                           Backend
+                              │
+                              ▼
+                          Frontend
+Health Flow:
+
+/health
+   ↓
+Backend
+
+/ai-health
+   ↓
+Backend → Forge AI
+
+/db-health
+   ↓
+Backend → PostgreSQL
+
+/ready
+   ↓
+Backend + Forge AI + PostgreSQL
+Current Backend responsibility:
+
+Frontend
+    ↓
+Backend-AI
+    ├── Authentication
+    │     ├── Register
+    │     └── Login
+    │
+    ├── Health Check
+    │     ├── Backend
+    │     ├── AI
+    │     ├── Database
+    │     └── Ready
+    │
+    ├── PostgreSQL
+    │     ├── users
+    │     └── image_tasks
+    │
+    └── Forge AI
+          └── Text-to-Image
