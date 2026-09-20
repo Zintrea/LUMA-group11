@@ -1,3 +1,10 @@
+// ==========================================
+// 🔒 ระบบป้องกัน: ถ้าล็อกอินอยู่แล้ว ให้เด้งไปหน้า /generate ทันที
+// ==========================================
+if (localStorage.getItem('userToken')) {
+  window.location.replace('/generate');
+}
+
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
@@ -23,10 +30,18 @@ if (loginForm) {
         body: JSON.stringify({ email: email, password: password })
       });
 
-      const data = await response.json();
+      // พยายามอ่านข้อความจาก Backend (ป้องกันกรณีเพื่อนส่งหน้าขาวๆ หรือค่าว่างกลับมา)
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.warn('Backend ไม่ได้ส่ง JSON กลับมา');
+      }
 
-      if (response.ok && data.status === 'ok') {
-        window.location.href = 'index.html';
+      // ขอแค่การตอบกลับเป็นสีเขียว (HTTP 200 OK) ก็ถือว่าล็อกอินผ่านทันที
+      if (response.ok) {
+        localStorage.setItem('userToken', 'is_logged_in_true');
+        window.location.href = '/generate'; 
       } else {
         throw new Error(data.message || 'รหัสผ่านผิด หรือไม่มีบัญชีนี้');
       }
@@ -73,9 +88,15 @@ if (registerForm) {
         })
       });
 
-      const data = await response.json();
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.warn('Backend ไม่ได้ส่ง JSON กลับมา');
+      }
 
-      if (response.ok && data.status === 'ok') {
+      // ขอแค่การตอบกลับเป็นสีเขียว (HTTP 200 OK) ก็ถือว่าสมัครผ่านทันที
+      if (response.ok) {
         alert("✅ สมัครสมาชิกสำเร็จ! ระบบจะพากลับไปหน้าเข้าสู่ระบบ");
         
         submitBtn.disabled = false;

@@ -1,3 +1,24 @@
+// ==========================================
+// 🔒 1. ระบบป้องกันหน้าเว็บ (Route Guard)
+// ==========================================
+if (!localStorage.getItem('userToken')) {
+  window.location.replace('/auth/login');
+}
+
+// ==========================================
+// 🚪 2. ระบบออกจากระบบ (Logout)
+// ==========================================
+const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', () => {
+    localStorage.removeItem('userToken'); 
+    window.location.replace('/auth/login'); 
+  });
+}
+
+// ==========================================
+// 🎨 3. โค้ดส่วน Generate รูปภาพ
+// ==========================================
 const BACKEND_URL = '/api/generate'; 
 
 const btnGenerate = document.getElementById('btnGenerate');
