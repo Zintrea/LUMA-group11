@@ -19,6 +19,7 @@ if (btnLogout) {
 // ==========================================
 // 🎨 3. โค้ดส่วน Generate รูปภาพ
 // ==========================================
+// แก้ไข: เติม / ด้านหน้า เพื่อให้วิ่งเข้าท่อ Nginx ถูกต้อง
 const BACKEND_URL = '/api/generate'; 
 
 const btnGenerate = document.getElementById('btnGenerate');
@@ -44,34 +45,46 @@ btnGenerate.addEventListener('click', async () => {
   loadingState.classList.remove('d-none');
 
   try {
+    // แพ็กเกจข้อมูลส่งไปหา Backend (app.py ของเพื่อน)
+    const payload = {
+      prompt: promptText,
+      negative_prompt: negativePromptInput.value.trim() || "low quality, blurry",
+      user_id: 1 // ตอนนี้ Backend บังคับใช้ค่า user_id 1 ไปก่อน
+    };
+
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: promptText })
+      body: JSON.stringify(payload)
     });
 
+    // ถ้า Backend ล่ม, ปิดอยู่, หรือตอบกลับ Error (เช่น 500, 503)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ (HTTP status: ${response.status})`);
     }
 
     const data = await response.json();
 
+    // เช็กว่า Backend ประมวลผลเสร็จ และดึงรูปจากฐานข้อมูล/AI มาให้ได้จริงๆ
     if (data.status === 'ok' && data.image) {
       resultImage.src = `data:image/png;base64,${data.image}`; 
       loadingState.classList.add('d-none');
       resultImage.classList.remove('d-none');
     } else {
-      throw new Error('Backend responded with an error or invalid format.');
+      throw new Error(data.message || 'Backend ตอบกลับมาในรูปแบบที่ไม่ถูกต้อง');
     }
   } catch (error) {
     console.error('Error generating image:', error);
-    alert('Failed to generate image. Please check the backend connection or API status.');
+    // แจ้งเตือนลูกค้าทันทีที่ระบบหลังบ้านมีปัญหา
+    alert('สร้างรูปภาพไม่สำเร็จ: ' + error.message);
     loadingState.classList.add('d-none');
     emptyState.classList.remove('d-none');
   } finally {
+    // คืนค่าปุ่มให้กลับมากดใหม่ได้
     btnGenerate.disabled = false;
     btnGenerate.innerHTML = '<i class="bi bi-magic me-1"></i> Generate Image';
   }
 });
 
+// พิมพ์ปุ๊บ เอาเส้นแดงแจ้งเตือน Error ออก
 promptInput.addEventListener('input', () => promptInput.classList.remove('is-invalid'));

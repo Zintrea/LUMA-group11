@@ -9,7 +9,7 @@ const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
 // ==========================================
-// ลอจิก Sign In (Login)
+// ลอจิก Sign In (บังคับต่อ Backend)
 // ==========================================
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
@@ -30,24 +30,24 @@ if (loginForm) {
         body: JSON.stringify({ email: email, password: password })
       });
 
-      // พยายามอ่านข้อความจาก Backend (ป้องกันกรณีเพื่อนส่งหน้าขาวๆ หรือค่าว่างกลับมา)
       let data = {};
       try {
         data = await response.json();
       } catch (err) {
-        console.warn('Backend ไม่ได้ส่ง JSON กลับมา');
+        console.warn('Backend ไม่ได้ส่งข้อมูล JSON กลับมา');
       }
 
-      // ขอแค่การตอบกลับเป็นสีเขียว (HTTP 200 OK) ก็ถือว่าล็อกอินผ่านทันที
       if (response.ok) {
-        localStorage.setItem('userToken', 'is_logged_in_true');
+        // ให้ Backend เป็นคนกำหนด Token ยืนยันตัวตน (ถ้าไม่มีให้ใช้ค่าเริ่มต้น)
+        localStorage.setItem('userToken', data.token || 'authenticated_user');
         window.location.href = '/generate'; 
       } else {
-        throw new Error(data.message || 'รหัสผ่านผิด หรือไม่มีบัญชีนี้');
+        throw new Error(data.message || 'รหัสผ่านผิด, ไม่มีบัญชีนี้ หรือไม่สามารถเชื่อมต่อฐานข้อมูลได้');
       }
     } catch (error) {
       console.error('Login Error:', error);
       alert('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
+    } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
@@ -55,7 +55,7 @@ if (loginForm) {
 }
 
 // ==========================================
-// ลอจิก Sign Up (Register)
+// ลอจิก Sign Up (บังคับต่อ Backend)
 // ==========================================
 if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {
@@ -92,25 +92,21 @@ if (registerForm) {
       try {
         data = await response.json();
       } catch (err) {
-        console.warn('Backend ไม่ได้ส่ง JSON กลับมา');
+        console.warn('Backend ไม่ได้ส่งข้อมูล JSON กลับมา');
       }
 
-      // ขอแค่การตอบกลับเป็นสีเขียว (HTTP 200 OK) ก็ถือว่าสมัครผ่านทันที
       if (response.ok) {
-        alert("✅ สมัครสมาชิกสำเร็จ! ระบบจะพากลับไปหน้าเข้าสู่ระบบ");
-        
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+        alert("✅ สมัครสมาชิกลงฐานข้อมูลสำเร็จ! กรุณาเข้าสู่ระบบ");
         registerForm.reset();
-
         const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
         loginTab.show();
       } else {
-        throw new Error(data.message || 'ไม่สามารถสมัครสมาชิกได้');
+        throw new Error(data.message || 'ไม่สามารถสมัครสมาชิกได้ (อีเมลอาจซ้ำ หรือเซิร์ฟเวอร์ล่ม)');
       }
     } catch (error) {
       console.error('Register Error:', error);
       alert('สมัครสมาชิกไม่สำเร็จ: ' + error.message);
+    } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
