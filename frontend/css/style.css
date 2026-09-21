@@ -1,97 +1,68 @@
 /* =========================================
-   LUMA - Core Stylesheet
-   ========================================= */
-
+   LUMA Global Styles (Dark Mode)
+========================================= */
 body {
   background-color: #121212;
   color: #e0e0e0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
 }
 
+/* Navbar (Topbar) */
 .topbar {
-  background-color: #1e1e1e;
-  border-bottom: 1px solid #333;
-}
-
-.sidebar {
   background-color: #1a1a1a;
-  border-right: 1px solid #333;
-  height: calc(100vh - 57px); 
-  overflow-y: auto;
+  border-bottom: 1px solid #2d2d2d;
+  height: 60px;
 }
 
+/* Sidebar (ฝั่งซ้ายตั้งค่า Prompt) */
+.sidebar {
+  background-color: #181818;
+  border-right: 1px solid #2d2d2d;
+  min-height: calc(100vh - 60px);
+}
+
+/* Workspace (ฝั่งขวาแสดงรูป) */
 .workspace {
-  background-color: #0f0f0f;
-  height: calc(100vh - 57px);
+  background-color: #121212;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#imageResultContainer {
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-}
-
-.btn-tool {
-  text-align: left;
-  margin-bottom: 8px;
-  background-color: #2d2d2d;
-  border: 1px solid #444;
-  color: #ccc;
-}
-
-.btn-tool:hover {
-  background-color: #3d3d3d;
-  color: #fff;
-}
-
-.btn-tool.active {
-  background-color: #0d6efd; 
-  border-color: #0d6efd;
-  color: #fff;
-}
-
-#canvasContainer,
-#imageResultContainer {
-  width: 100%;
-  max-width: 800px;
-  height: 500px;
-  background-color: #222;
-  border: 1px solid #444;
-  border-radius: 4px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  position: relative;
-}
-
-#canvasContainer,
-#imageResultContainer.checkerboard {
-  background-image: 
-    linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
-    linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
-    linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
-    linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-}
-
-canvas {
-  position: absolute;
-  cursor: crosshair;
-}
-
-#maskCanvas {
-  opacity: 0.65; 
-  filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6)); 
-  transition: opacity 0.2s ease-in-out; 
-}
-
-#maskCanvas:hover {
-  opacity: 0.8;
+  padding: 2rem;
 }
 
 #resultImage {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 75vh;
   object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* =========================================
+   หน้า Authentication (Login & Register) 
+========================================= */
+.auth-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #121212;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
 }
