@@ -1,3 +1,7 @@
+// ==========================================
+// 🛡️ ADMIN PANEL SCRIPT (LUMA AI)
+// ==========================================
+
 // ตรวจสอบสิทธิ์ Admin
 async function checkAdminSession() {
   try {
@@ -29,25 +33,31 @@ async function checkAdminSession() {
   }
 }
 
-// โหลด Dashboard
+// 1 & 2. โหลด Dashboard และ Recent Generations (แก้ Contract ให้ตรงกับ Backend)
 async function loadDashboard() {
   try {
+    // 1. Dashboard: /api/admin/dashboard -> ใช้ data.stats
     const res = await fetch('/api/admin/dashboard', { method: 'GET', credentials: 'include' });
     const data = await res.json();
+    
     if (res.ok) {
-      document.getElementById('statTotalUsers').textContent = data.total_users ?? 0;
-      document.getElementById('statImagesToday').textContent = data.images_today ?? 0;
-      document.getElementById('statFailedTasks').textContent = data.failed_tasks ?? 0;
-      document.getElementById('statAiForge').textContent = data.ai_forge ?? '-';
+      const stats = data.stats || {};
+      document.getElementById('statTotalUsers').textContent = stats.total_users ?? 0;
+      document.getElementById('statImagesToday').textContent = stats.images_today ?? 0;
+      document.getElementById('statFailedTasks').textContent = stats.failed_tasks ?? 0;
+      document.getElementById('statAiForge').textContent = stats.ai_forge ?? '-';
     }
 
+    // 2. Recent Generations: /api/admin/recent-generations -> ใช้ data.generations
     const tableBody = document.getElementById('tableBody');
     const resGens = await fetch('/api/admin/recent-generations', { method: 'GET', credentials: 'include' });
     const dataGens = await resGens.json();
 
-    if (resGens.ok && dataGens.data && dataGens.data.length > 0) {
+    const generationsList = dataGens.generations || [];
+
+    if (resGens.ok && generationsList.length > 0) {
       tableBody.innerHTML = '';
-      dataGens.data.forEach(item => {
+      generationsList.forEach(item => {
         const modelDisplay = item.model ? item.model.split('\\').pop() : '-';
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -68,15 +78,18 @@ async function loadDashboard() {
   }
 }
 
-// โหลด Users
+// 3. โหลด Users Management: /api/admin/users -> ใช้ data.users
 async function loadUsers() {
   const table = document.getElementById('tableUsers');
   try {
     const res = await fetch('/api/admin/users', { method: 'GET', credentials: 'include' });
     const data = await res.json();
-    if (res.ok && data.data) {
+    
+    const usersList = data.users || [];
+
+    if (res.ok && usersList.length > 0) {
       table.innerHTML = '';
-      data.data.forEach(user => {
+      usersList.forEach(user => {
         const isActive = user.is_active !== undefined ? user.is_active : user.status;
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -92,6 +105,8 @@ async function loadUsers() {
         `;
         table.appendChild(tr);
       });
+    } else {
+      table.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No users found</td></tr>';
     }
   } catch (err) {
     table.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading users</td></tr>';
@@ -106,6 +121,7 @@ function openEditUser(id, username, role, isActive) {
   new bootstrap.Modal(document.getElementById('editUserModal')).show();
 }
 
+// 5. แก้ไข User ผ่าน PATCH /api/admin/users/{id}
 document.getElementById('btnSaveUser').addEventListener('click', async () => {
   const id = document.getElementById('editUserId').value;
   const role = document.getElementById('editRole').value;
@@ -120,7 +136,7 @@ document.getElementById('btnSaveUser').addEventListener('click', async () => {
     });
     if (res.ok) {
       bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-      loadUsers();
+      loadUsers(); // Refresh รายชื่อหลังแก้สำเร็จ
     } else {
       alert('Update failed');
     }
@@ -129,33 +145,44 @@ document.getElementById('btnSaveUser').addEventListener('click', async () => {
   }
 });
 
-// โหลด AI Settings
+// 6 & 7. AI Server Settings & Models (ใช้ data.ai.status และ data.models)
 async function loadAISettings() {
   try {
     const res = await fetch('/api/admin/ai', { method: 'GET', credentials: 'include' });
     const data = await res.json();
-    if (res.ok && data.status === 'online') {
+    
+    // เช็คจาก ai.status ตาม Backend ส่งมา
+    const aiStatus = data.ai ? data.ai.status : 'offline';
+    const aiMessage = data.ai ? data.ai.message : 'Disconnected';
+
+    if (res.ok && aiStatus === 'online') {
       document.getElementById('aiStatusMainText').textContent = 'Online';
-      document.getElementById('aiStatusMessage').textContent = data.message || 'Connected';
+      document.getElementById('aiStatusMessage').textContent = aiMessage;
     } else {
       document.getElementById('aiStatusMainText').textContent = 'Offline';
+      document.getElementById('aiStatusMessage').textContent = aiMessage;
     }
 
     const tableModels = document.getElementById('tableModels');
     const resModels = await fetch('/api/admin/ai/models', { method: 'GET', credentials: 'include' });
     const dataModels = await resModels.json();
-    if (resModels.ok && dataModels.data) {
+    
+    const modelsList = dataModels.models || [];
+
+    if (resModels.ok && modelsList.length > 0) {
       tableModels.innerHTML = '';
-      dataModels.data.forEach(m => {
+      modelsList.forEach(m => {
         tableModels.innerHTML += `<tr><td class="text-light">${m.model_name || m.name}</td><td><span class="badge bg-secondary font-monospace">${m.hash || '-'}</span></td></tr>`;
       });
+    } else {
+      tableModels.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-5">No models available</td></tr>';
     }
   } catch (err) {
     console.error('AI Settings Error:', err);
   }
 }
 
-// Event ควบคุม Sidebar Tabs และระบบเริ่มต้น
+// Initial Events & Tabs
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await checkAdminSession();
   if (!admin) return;
@@ -163,14 +190,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadDashboard();
   loadAISettings();
 
-  const navLinks = document.querySelectorAll('.nav-link');
+  const navLinks = document.querySelectorAll('.admin-sidebar .nav-link');
   const sections = document.querySelectorAll('.admin-section');
 
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       
-      // สลับ Active Style ของเมนู
       navLinks.forEach(l => { 
         l.classList.remove('active', 'fw-bold', 'text-white', 'bg-secondary', 'bg-opacity-25'); 
         l.classList.add('text-muted'); 
@@ -178,7 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       link.classList.add('active', 'fw-bold', 'text-white', 'bg-secondary', 'bg-opacity-25');
       link.classList.remove('text-muted');
 
-      // สลับแสดง Section หน้าจอ
       const targetId = link.getAttribute('data-target');
       sections.forEach(sec => {
         if (sec.id === targetId) {
@@ -188,13 +213,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
 
-      // โหลดข้อมูลตามหน้าต่างที่กด
       if (targetId === 'section-dashboard') loadDashboard();
       if (targetId === 'section-users') loadUsers();
       if (targetId === 'section-ai') loadAISettings();
     });
   });
 
+  // 9. Logout
   const btnLogout = document.getElementById('adminLogoutBtn');
   if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
