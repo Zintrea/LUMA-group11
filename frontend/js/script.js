@@ -88,3 +88,29 @@ btnGenerate.addEventListener('click', async () => {
 
 // พิมพ์ปุ๊บ เอาเส้นแดงแจ้งเตือน Error ออก
 promptInput.addEventListener('input', () => promptInput.classList.remove('is-invalid'));
+
+// ==========================================
+// 🏠 โค้ดสำหรับหน้า Home (Landing Page)
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  const navLoginBtn = document.getElementById('navLoginBtn');
+  const navStartBtn = document.getElementById('navStartBtn');
+  const heroCtaBtn = document.getElementById('heroCtaBtn');
+
+  // ใช้ if ครอบไว้เพื่อเช็กว่ามีปุ่มนี้อยู่ในหน้าปัจจุบันไหม (จะได้ไม่ Error เวลาเปิดหน้าอื่น)
+  if (navLoginBtn || navStartBtn || heroCtaBtn) {
+    if (localStorage.getItem('userToken')) {
+      if (navLoginBtn) navLoginBtn.classList.add('d-none'); 
+      
+      if (navStartBtn) {
+        navStartBtn.innerHTML = '<i class="bi bi-palette me-1"></i> Workspace';
+        navStartBtn.href = '/generate';
+      }
+      
+      if (heroCtaBtn) {
+        heroCtaBtn.innerHTML = '<i class="bi bi-palette me-2"></i> Go to Workspace';
+        heroCtaBtn.href = '/generate';
+      }
+    }
+  }
+});
