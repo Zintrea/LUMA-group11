@@ -1,0 +1,964 @@
+from flask import Blueprint, jsonify, request, current_app, session
+import psycopg2
+import requests
+from werkzeug.security import generate_password_hash, check_password_hash
+
+api = Blueprint("api", __name__)
+
+# =========================================
+# DATABASE CONNECTION
+# =========================================
+
+def get_db_connection():
+    return psycopg2.connect(
+        host=current_app.config["DATABASE_HOST"],
+        port=current_app.config["DATABASE_PORT"],
+        database=current_app.config["DATABASE_NAME"],
+        user=current_app.config["DATABASE_USER"],
+        password=current_app.config["DATABASE_PASSWORD"]
+    )
+
+
+# =========================================
+# CHECK AI
+# =========================================
+
+def check_ai():
+    """
+    ตรวจสอบว่า Backend สามารถเชื่อมต่อ AI/Forge ได้หรือไม่
+    """
+
+    try:
+
+        response = requests.get(
+            f"{current_app.config['FORGE_URL']}/sdapi/v1/sd-models",
+            timeout=5
+        )
+
+        if response.status_code == 200:
+
+            return {
+                "status": "ok",
+                "ai": "connected",
+                "message": "AI/Forge is ready"
+            }
+
+        return {
+            "status": "error",
+            "ai": "not ready",
+            "message": f"AI/Forge returned HTTP {response.status_code}"
+        }
+
+    except requests.exceptions.ConnectionError:
+
+        return {
+            "status": "error",
+            "ai": "not connected",
+            "message": "Cannot connect to AI/Forge"
+        }
+
+    except requests.exceptions.Timeout:
+
+        return {
+            "status": "error",
+            "ai": "timeout",
+            "message": "Connection to AI/Forge timed out"
+        }
+
+    except Exception as error:
+
+        return {
+            "status": "error",
+            "ai": "error",
+            "message": str(error)
+        }
+
+
+# =========================================
+# CHECK DATABASE
+# =========================================
+
+def check_database():
+    """
+    ตรวจสอบว่า Backend สามารถเชื่อมต่อ PostgreSQL ได้หรือไม่
+    """
+
+    conn = None
+    cur = None
+
+    try:
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("SELECT 1;")
+
+        result = cur.fetchone()
+
+        if result and result[0] == 1:
+
+            return {
+                "status": "ok",
+                "database": "connected",
+                "message": "PostgreSQL is ready"
+            }
+
+        return {
+            "status": "error",
+            "database": "not ready",
+            "message": "Database test failed"
+        }
+
+    except Exception as error:
+
+        return {
+            "status": "error",
+            "database": "not connected",
+            "message": str(error)
+        }
+
+    finally:
+
+        if cur:
+            cur.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================
+# HEALTH CHECK
+# =========================================
+
+@api.route("/health", methods=["GET"])
+def health():
+
+    return jsonify({
+        "status": "ok"
+    })
+
+
+# =========================================
+# AI HEALTH CHECK
+# =========================================
+
+@api.route("/ai-health", methods=["GET"])
+def ai_health():
+
+    result = check_ai()
+
+    if result["status"] == "ok":
+
+        return jsonify(result), 200
+
+    return jsonify(result), 503
+
+
+# =========================================
+# DATABASE HEALTH CHECK
+# =========================================
+
+@api.route("/db-health", methods=["GET"])
+def db_health():
+
+    result = check_database()
+
+    if result["status"] == "ok":
+
+        return jsonify(result), 200
+
+    return jsonify(result), 503
+
+
+# =========================================
+# READY CHECK
+# BACKEND + AI + DATABASE
+# =========================================
+
+@api.route("/ready", methods=["GET"])
+def ready():
+
+    # Backend
+    backend_status = "ok"
+
+    # AI
+    ai_result = check_ai()
+
+    # Database
+    database_result = check_database()
+
+    # ตรวจสอบทั้งหมด
+    all_ready = (
+        backend_status == "ok"
+        and ai_result["status"] == "ok"
+        and database_result["status"] == "ok"
+    )
+
+    if all_ready:
+
+        return jsonify({
+            "status": "ready",
+            "backend": "ok",
+            "ai": "ok",
+            "database": "ok"
+        }), 200
+
+    return jsonify({
+        "status": "not_ready",
+        "backend": backend_status,
+        "ai": ai_result["status"],
+        "database": database_result["status"]
+    }), 503
+
+
+# =========================================
+# AUTH - REGISTER
+# =========================================
+
+@api.route("/auth/register", methods=["POST"])
+def register():
+
+    # -------------------------------------
+    # รับข้อมูล
+    # -------------------------------------
+
+    data = request.get_json(silent=True)
+
+    if not data:
+
+        return jsonify({
+            "status": "error",
+            "message": "Request body is required"
+        }), 400
+
+
+    username = str(data.get("username", "")).strip()
+    email = str(data.get("email", "")).strip().lower()
+    password = str(data.get("password", ""))
+
+
+    # -------------------------------------
+    # ตรวจข้อมูล
+    # -------------------------------------
+
+    if not username:
+
+        return jsonify({
+            "status": "error",
+            "message": "username is required"
+        }), 400
+
+
+    if not email:
+
+        return jsonify({
+            "status": "error",
+            "message": "email is required"
+        }), 400
+
+
+    if not password:
+
+        return jsonify({
+            "status": "error",
+            "message": "password is required"
+        }), 400
+
+
+    # -------------------------------------
+    # ตรวจความยาว Password
+    # -------------------------------------
+
+    if len(password) < 6:
+
+        return jsonify({
+            "status": "error",
+            "message": "password must be at least 6 characters"
+        }), 400
+
+
+    conn = None
+    cur = None
+
+    try:
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+
+        # -------------------------------------
+        # ตรวจ Username ซ้ำ
+        # -------------------------------------
+
+        cur.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE username = %s;
+            """,
+            (username,)
+        )
+
+        existing_username = cur.fetchone()
+
+        if existing_username:
+
+            return jsonify({
+                "status": "error",
+                "message": "username already exists"
+            }), 409
+
+
+        # -------------------------------------
+        # ตรวจ Email ซ้ำ
+        # -------------------------------------
+
+        cur.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE email = %s;
+            """,
+            (email,)
+        )
+
+        existing_email = cur.fetchone()
+
+        if existing_email:
+
+            return jsonify({
+                "status": "error",
+                "message": "email already exists"
+            }), 409
+
+
+        # -------------------------------------
+        # Hash Password
+        # -------------------------------------
+
+        password_hash = generate_password_hash(password)
+
+
+        # -------------------------------------
+        # สร้าง User
+        #
+        # role = user เสมอ
+        # is_active = true
+        # -------------------------------------
+
+        cur.execute(
+            """
+            INSERT INTO users
+            (
+                username,
+                email,
+                password_hash,
+                role,
+                is_active
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                'user',
+                TRUE
+            )
+            RETURNING
+                id,
+                username,
+                email,
+                role,
+                is_active,
+                created_at;
+            """,
+            (
+                username,
+                email,
+                password_hash
+            )
+        )
+
+
+        user = cur.fetchone()
+
+        conn.commit()
+
+
+        # -------------------------------------
+        # ส่งข้อมูลกลับ
+        # ไม่ส่ง Password
+        # -------------------------------------
+
+        return jsonify({
+
+            "status": "ok",
+
+            "message": "Registration successful",
+
+            "user": {
+
+                "id": user[0],
+
+                "username": user[1],
+
+                "email": user[2],
+
+                "role": user[3],
+
+                "is_active": user[4],
+
+                "created_at": (
+                    user[5].isoformat()
+                    if user[5]
+                    else None
+                )
+            }
+
+        }), 201
+
+
+    except psycopg2.IntegrityError:
+
+        if conn:
+            conn.rollback()
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": "Username or email already exists"
+
+        }), 409
+
+
+    except Exception as error:
+
+        if conn:
+            conn.rollback()
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(error)
+
+        }), 500
+
+
+    finally:
+
+        if cur:
+            cur.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================
+# AUTH - LOGIN
+# =========================================
+
+@api.route("/auth/login", methods=["POST"])
+def login():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"status": "error", "message": "Request body is required"}), 400
+
+    login_value = str(data.get("username", "")).strip()
+    password = str(data.get("password", ""))
+    if not login_value or not password:
+        return jsonify({"status": "error", "message": "username/email and password are required"}), 400
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, username, email, password_hash, role, is_active, created_at
+            FROM users
+            WHERE username = %s OR email = %s
+        """, (login_value, login_value))
+        user = cur.fetchone()
+        if not user:
+            return jsonify({"status": "error", "message": "Invalid username/email or password"}), 401
+
+        user_id, username, email, password_hash, role, is_active, created_at = user
+        if not is_active:
+            return jsonify({"status": "error", "message": "User account is inactive"}), 403
+
+        try:
+            password_valid = check_password_hash(password_hash, password)
+        except (ValueError, TypeError):
+            password_valid = False
+
+        # Temporary migration for legacy plaintext passwords; remove after migration.
+        if not password_valid and password_hash == password:
+            new_hash = generate_password_hash(password)
+            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, user_id))
+            conn.commit()
+            password_valid = True
+
+        if not password_valid:
+            return jsonify({"status": "error", "message": "Invalid username/email or password"}), 401
+
+        session.clear()
+        session["user_id"] = user_id
+        session["username"] = username
+        session["role"] = role
+        return jsonify({
+            "message": "Login successful",
+            "status": "success",
+            "user": {
+                "id": user_id,
+                "username": username,
+                "email": email,
+                "role": role,
+                "is_active": is_active,
+                "created_at": created_at.isoformat() if created_at else None
+            }
+        }), 200
+    except Exception as error:
+        if conn:
+            conn.rollback()
+        return jsonify({"status": "error", "message": str(error)}), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+
+# =========================================
+# AUTH - CURRENT USER
+# =========================================
+
+@api.route("/auth/me", methods=["GET"])
+def me():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, username, role, is_active
+            FROM users
+            WHERE id = %s
+        """, (user_id,))
+        user = cur.fetchone()
+        if not user or not user[3]:
+            session.clear()
+            return jsonify({"status": "error", "message": "Account unavailable"}), 401
+        session["user_id"] = user[0]
+        session["username"] = user[1]
+        session["role"] = user[2]
+        return jsonify({"status": "success", "user": {"id": user[0], "username": user[1], "role": user[2]}}), 200
+    except Exception as error:
+        return jsonify({"status": "error", "message": str(error)}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+# =========================================
+# AUTH - LOGOUT
+# =========================================
+
+@api.route("/auth/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"status": "success", "message": "Logout successful"}), 200
+
+
+# =========================================
+# GENERATE
+# FRONTEND → BACKEND → DATABASE → FORGE
+# =========================================
+
+@api.route("/generate", methods=["POST"])
+def generate():
+
+    # Use the authenticated user, never a user_id supplied by the client.
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"status": "error", "message": "Authentication required"}), 401
+
+    # -------------------------------------
+    # รับข้อมูลจาก Frontend
+    # -------------------------------------
+
+    data = request.get_json(silent=True)
+
+    if not data:
+
+        return jsonify({
+            "status": "error",
+            "message": "Request body is required"
+        }), 400
+
+
+    prompt = str(data.get("prompt", "")).strip()
+
+
+    if not prompt:
+
+        return jsonify({
+            "status": "error",
+            "message": "prompt is required"
+        }), 400
+
+
+    # -------------------------------------
+    # Parameters สำหรับ Forge
+    # -------------------------------------
+
+    negative_prompt = data.get(
+        "negative_prompt",
+        "low quality, blurry"
+    )
+
+    steps = data.get("steps", 10)
+    width = data.get("width", 512)
+    height = data.get("height", 512)
+    cfg_scale = data.get("cfg_scale", 7)
+
+    sampler_name = data.get(
+        "sampler_name",
+        "Euler a"
+    )
+
+
+
+    # -------------------------------------
+    # DATABASE
+    # สร้าง task ก่อนเริ่ม Generate
+    # -------------------------------------
+
+    conn = None
+    cur = None
+    task_id = None
+
+
+    try:
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+
+        # -------------------------------------
+        # สร้าง task เป็น pending
+        # -------------------------------------
+
+        cur.execute(
+            """
+            INSERT INTO image_tasks
+            (
+                user_id,
+                task_type,
+                status,
+                prompt_text
+            )
+            VALUES
+            (
+                %s,
+                'generate',
+                'pending',
+                %s
+            )
+            RETURNING id;
+            """,
+            (
+                user_id,
+                prompt
+            )
+        )
+
+
+        task_id = cur.fetchone()[0]
+
+        conn.commit()
+
+
+        print(
+            f"Task created: {task_id}"
+        )
+
+
+        # -------------------------------------
+        # เปลี่ยนสถานะเป็น processing
+        # -------------------------------------
+
+        cur.execute(
+            """
+            UPDATE image_tasks
+            SET status = 'processing'
+            WHERE id = %s;
+            """,
+            (task_id,)
+        )
+
+
+        conn.commit()
+
+
+        # =====================================
+        # ส่ง Prompt ไป Forge
+        # =====================================
+
+        payload = {
+
+            "prompt": prompt,
+
+            "negative_prompt": negative_prompt,
+
+            "steps": steps,
+
+            "width": width,
+
+            "height": height,
+
+            "cfg_scale": cfg_scale,
+
+            "sampler_name": sampler_name
+        }
+
+
+        print(
+            "Sending prompt to Forge..."
+        )
+
+        print(
+            "Prompt:",
+            prompt
+        )
+
+
+        response = requests.post(
+
+            f"{current_app.config['FORGE_URL']}/sdapi/v1/txt2img",
+
+            json=payload,
+
+            timeout=180
+        )
+
+
+        response.raise_for_status()
+
+
+        forge_data = response.json()
+
+
+        # -------------------------------------
+        # ตรวจสอบรูปจาก Forge
+        # -------------------------------------
+
+        if "images" not in forge_data:
+
+            raise Exception(
+                "Forge did not return images"
+            )
+
+
+        if not forge_data["images"]:
+
+            raise Exception(
+                "Forge returned empty image"
+            )
+
+
+        image_base64 = forge_data["images"][0]
+
+
+        # =====================================
+        # Generate สำเร็จ
+        # เปลี่ยน status → completed
+        # =====================================
+
+        cur.execute(
+            """
+            UPDATE image_tasks
+            SET status = 'completed'
+            WHERE id = %s;
+            """,
+            (task_id,)
+        )
+
+
+        conn.commit()
+
+
+        print(
+            f"Task {task_id} completed"
+        )
+
+
+        # =====================================
+        # ส่งรูปกลับ Frontend
+        # =====================================
+
+        return jsonify({
+
+            "status": "ok",
+
+            "task_id": task_id,
+
+            "image": image_base64
+
+        }), 200
+
+
+    # =====================================
+    # ERROR - AI CONNECTION
+    # =====================================
+
+    except requests.exceptions.ConnectionError:
+
+        if conn and task_id:
+
+            cur.execute(
+                """
+                UPDATE image_tasks
+                SET status = 'failed'
+                WHERE id = %s;
+                """,
+                (task_id,)
+            )
+
+            conn.commit()
+
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": "AI server is unavailable",
+
+            "task_id": task_id
+
+        }), 503
+
+
+    # =====================================
+    # ERROR - AI TIMEOUT
+    # =====================================
+
+    except requests.exceptions.Timeout:
+
+        if conn and task_id:
+
+            cur.execute(
+                """
+                UPDATE image_tasks
+                SET status = 'failed'
+                WHERE id = %s;
+                """,
+                (task_id,)
+            )
+
+            conn.commit()
+
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": "AI request timeout",
+
+            "task_id": task_id
+
+        }), 504
+
+
+    # =====================================
+    # ERROR - GENERAL
+    # =====================================
+
+    except Exception as error:
+
+        if conn and task_id:
+
+            cur.execute(
+                """
+                UPDATE image_tasks
+                SET status = 'failed'
+                WHERE id = %s;
+                """,
+                (task_id,)
+            )
+
+            conn.commit()
+
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(error),
+
+            "task_id": task_id
+
+        }), 500
+
+
+    finally:
+
+        if cur:
+            cur.close()
+
+        if conn:
+            conn.close()
+
+# =========================================
+# MODELS
+# GET MODEL LIST FROM FORGE
+# =========================================
+
+@api.route("/models", methods=["GET"])
+def models():
+
+    try:
+        response = requests.get(
+            f"{current_app.config['FORGE_URL']}/sdapi/v1/sd-models",
+            timeout=10
+        )
+
+        response.raise_for_status()
+
+        forge_models = response.json()
+
+        models = []
+
+        for model in forge_models:
+            models.append({
+                "title": model.get("title"),
+                "model_name": model.get("model_name"),
+                "hash": model.get("hash")
+            })
+
+        return jsonify({
+            "status": "success",
+            "models": models
+        }), 200
+
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            "status": "error",
+            "message": "Cannot connect to AI/Forge"
+        }), 503
+
+    except requests.exceptions.Timeout:
+        return jsonify({
+            "status": "error",
+            "message": "Connection to AI/Forge timed out"
+        }), 504
+
+    except Exception as error:
+        return jsonify({
+            "status": "error",
+            "message": str(error)
+        }), 500
