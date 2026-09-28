@@ -1,56 +1,210 @@
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
+
 <head>
+
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
   <title>LUMA - AI Image Generator</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
-  <!-- ลิงก์ CSS ไปที่ไฟล์หลักไฟล์เดียว (เพราะคุณรวมโค้ดไว้ในนี้หมดแล้ว) -->
-  <link rel="stylesheet" href="/assets/css/style.css">
+
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  >
+
+
+  <!-- แก้ path ให้ตรงกับโฟลเดอร์จริง -->
+
+  <link
+    rel="stylesheet"
+    href="/css/style.css"
+  >
+
 </head>
+
+
 <body>
 
+
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg topbar px-3 py-2 navbar-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand text-white fw-bold" href="/"><i class="bi bi-stars text-primary"></i> LUMA</a>
-      
-      <div class="ms-auto d-flex gap-2">
-        <a href="/auth/login" class="btn btn-outline-light" id="navLoginBtn">Sign In</a>
-        <a href="/auth/login" class="btn btn-primary fw-bold" id="navStartBtn">Get Started</a>
+
+  <nav
+    class="navbar navbar-expand-lg topbar px-3 py-2 navbar-dark"
+  >
+
+    <div
+      class="container-fluid"
+    >
+
+      <a
+        class="navbar-brand text-white fw-bold"
+        href="/"
+      >
+
+        <i
+          class="bi bi-stars text-primary"
+        ></i>
+
+        LUMA
+
+      </a>
+
+
+      <div
+        class="ms-auto d-flex gap-2"
+      >
+
+        <a
+          href="/auth/login"
+          class="btn btn-outline-light"
+          id="navLoginBtn"
+        >
+          Sign In
+        </a>
+
+
+        <a
+          href="/auth/login"
+          class="btn btn-primary fw-bold"
+          id="navStartBtn"
+        >
+          Get Started
+        </a>
+
       </div>
+
     </div>
+
   </nav>
 
+
+
   <!-- Hero Section -->
-  <div class="hero-section text-center d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 60px);">
-    <div class="container">
-      <h1 class="hero-title fw-bold text-white mb-4">
-        Bring Your Imagination to <span class="text-primary">Life</span>
+
+  <div
+    class="hero-section text-center d-flex align-items-center justify-content-center"
+    style="min-height: calc(100vh - 60px);"
+  >
+
+    <div
+      class="container"
+    >
+
+      <h1
+        class="hero-title fw-bold text-white mb-4"
+      >
+
+        Bring Your Imagination to
+
+        <span
+          class="text-primary"
+        >
+          Life
+        </span>
+
       </h1>
-      <p class="lead text-secondary mb-5 mx-auto" style="max-width: 600px;">
-        Transform your text descriptions into stunning, high-quality images in seconds powered by advanced AI technology.
+
+
+      <p
+        class="lead text-secondary mb-5 mx-auto"
+        style="max-width: 600px;"
+      >
+
+        Transform your text descriptions
+        into stunning, high-quality images
+        in seconds powered by advanced AI
+        technology.
+
       </p>
-      
-      <a href="/auth/login" class="btn btn-primary btn-lg fw-bold px-5 py-3 shadow-lg" id="heroCtaBtn">
-        <i class="bi bi-magic me-2"></i> Start Generating for Free
+
+
+      <a
+        href="/auth/login"
+        class="btn btn-primary btn-lg fw-bold px-5 py-3 shadow-lg"
+        id="heroCtaBtn"
+      >
+
+        <i
+          class="bi bi-magic me-2"
+        ></i>
+
+        Start Generating for Free
+
       </a>
-      
-      <div class="mt-5 text-muted small">
-        <div class="d-flex justify-content-center gap-4">
-          <span><i class="bi bi-check-circle-fill text-success me-1"></i> Fast Processing</span>
-          <span><i class="bi bi-check-circle-fill text-success me-1"></i> High Resolution</span>
-          <span><i class="bi bi-check-circle-fill text-success me-1"></i> No Credit Card Required</span>
+
+
+      <div
+        class="mt-5 text-muted small"
+      >
+
+        <div
+          class="d-flex justify-content-center gap-4"
+        >
+
+          <span>
+
+            <i
+              class="bi bi-check-circle-fill text-success me-1"
+            ></i>
+
+            Fast Processing
+
+          </span>
+
+
+          <span>
+
+            <i
+              class="bi bi-check-circle-fill text-success me-1"
+            ></i>
+
+            High Resolution
+
+          </span>
+
+
+          <span>
+
+            <i
+              class="bi bi-check-circle-fill text-success me-1"
+            ></i>
+
+            No Credit Card Required
+
+          </span>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- ลิงก์ JS ไปที่ไฟล์ home.js ตามที่คุณตั้งใจแยกไว้ -->
-  <script src="/assets/js/home.js"></script>
+
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+
+
+  <!-- แก้ path + cache bust -->
+
+  <script
+    src="/js/home.js?v=4"
+  ></script>
+
 </body>
 </html>
