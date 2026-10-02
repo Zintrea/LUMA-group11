@@ -36,8 +36,8 @@
             <i class="bi bi-people-fill me-2"></i> Users Management
           </a>
         </li>
-        <!-- ซ่อน AI Server Settings เพราะอยู่นอก Scope -->
-        <li class="nav-item d-none">
+        <!-- เปิดใช้งาน AI Server Settings -->
+        <li class="nav-item">
           <a href="#" class="nav-link text-muted py-2 px-3 rounded" data-target="section-ai">
             <i class="bi bi-hdd-network-fill me-2"></i> AI Server Settings
           </a>
@@ -165,7 +165,7 @@
         </div>
       </div>
 
-      <!-- ================= 3. SECTION: AI SETTINGS (ซ่อนไว้) ================= -->
+      <!-- ================= 3. SECTION: AI SETTINGS ================= -->
       <div id="section-ai" class="admin-section d-none">
         <div class="admin-card bg-dark border border-secondary rounded p-4 shadow-sm mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -219,8 +219,8 @@
             </div>
             <div class="mb-3">
               <label class="form-label text-light small">Role</label>
-              <!-- ปิดการแก้ไข Role (disabled) ตาม Scope ที่กำหนด -->
-              <select class="form-select bg-dark text-light border-secondary" id="editRole" disabled>
+              <!-- เปิดให้แก้ไข Role ได้แล้ว -->
+              <select class="form-select bg-dark text-light border-secondary" id="editRole">
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
               </select>
