@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify, request, current_app, session
+from flask import Blueprint, jsonify, request, current_app, session,send_file
 import psycopg2
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from hismat import hismat
+from PIL import Image
+from io import BytesIO
 api = Blueprint("api", __name__)
 
 # =========================================
@@ -1579,4 +1581,48 @@ def models():
         return jsonify({
             "status": "error",
             "message": str(error)
+        }), 500
+
+@api.route("/hismat", methods=["POST"])
+def hismat_route():
+    try:
+        if "source_image" not in request.files:
+            return jsonify({
+                "status": "error",
+                "message": "source_image is required"
+            }), 400
+
+        if "reference_image" not in request.files:
+            return jsonify({
+                "status": "error",
+                "message": "reference_image is required"
+            }), 400
+
+        source_image = Image.open(
+            request.files["source_image"]
+        ).convert("RGB")
+
+        reference_image = Image.open(
+            request.files["reference_image"]
+        ).convert("RGB")
+
+        result = hismat(
+            source_image,
+            reference_image
+        )
+
+        output = BytesIO()
+        result.save(output, format="PNG")
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype="image/png",
+            download_name="hismat.png"
+        )
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
         }), 500
