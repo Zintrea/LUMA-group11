@@ -1,9 +1,9 @@
 @echo off
-setlocal
+setlocal EnableExtensions EnableDelayedExpansion
 set "ROOT=%~dp0"
-set "PYTHON=%ROOT%.venv\Scripts\python.exe"
+set "PYTHON=!ROOT!.venv\Scripts\python.exe"
 
-if not exist "%PYTHON%" (
+if not exist "!PYTHON!" (
   echo ERROR: rembg is not installed yet. Run setup-rembg-cpu.bat first.
   pause
   exit /b 1
@@ -16,11 +16,11 @@ if errorlevel 1 (
   exit /b 1
 )
 
-set "REMBG_HOME=%ROOT%"
+set "REMBG_HOME=!ROOT!"
 set "REMBG_MODEL=u2net"
-"%PYTHON%" "%ROOT%verify.py"
+"!PYTHON!" "!ROOT!verify.py"
 if errorlevel 1 (
-  echo FAIL: Verification failed. Check the newest files in %ROOT%logs
+  echo FAIL: Verification failed. Check the newest files in !ROOT!logs
   pause
   exit /b 1
 )

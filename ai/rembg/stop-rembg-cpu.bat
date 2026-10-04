@@ -1,25 +1,28 @@
 @echo off
-setlocal
+setlocal EnableExtensions EnableDelayedExpansion
 set "ROOT=%~dp0"
-set "PID_FILE=%ROOT%rembg.pid"
+set "PID_FILE=!ROOT!rembg.pid"
 
-if not exist "%PID_FILE%" (
+if not exist "!PID_FILE!" (
   echo INFO: No rembg.pid file was found. Service may already be stopped.
+  pause
   exit /b 0
 )
 
-set /p PID=<"%PID_FILE%"
-if "%PID%"=="" (
+set /p PID=<"!PID_FILE!"
+if "!PID!"=="" (
   echo ERROR: rembg.pid is empty. Remove it manually only after confirming no service is running.
+  pause
   exit /b 1
 )
 
-taskkill /PID %PID% /T /F >nul 2>&1
+taskkill /PID !PID! /T /F >nul 2>&1
 if errorlevel 1 (
-  echo ERROR: Cannot stop PID %PID%. It may already be stopped.
+  echo ERROR: Cannot stop PID !PID!. It may already be stopped.
+  pause
   exit /b 1
 )
 
-del "%PID_FILE%"
+del "!PID_FILE!"
 echo PASS: LUMA rembg service stopped.
 pause
