@@ -1,9 +1,41 @@
 // ==========================================
-// 🔐 LUMA AUTH SCRIPT
+// 🔐 LUMA AUTH SCRIPT (Updated with Inline & Connection Alerts)
 // ==========================================
 
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
+
+// สร้างตัวแปรดึงกล่องแจ้งเตือนสีแดง
+const loginAlert = document.getElementById('loginAlert');
+const registerAlert = document.getElementById('registerAlert');
+
+// ฟังก์ชันช่วยแสดงข้อความเตือน
+function showAlert(element, message) {
+  if (element) {
+    element.textContent = message;
+    element.classList.remove('d-none');
+  }
+}
+
+// ฟังก์ชันซ่อนกล่องข้อความเตือน
+function hideAlert(element) {
+  if (element) {
+    element.textContent = '';
+    element.classList.add('d-none');
+  }
+}
+
+// ซ่อนกล่องแจ้งเตือนทันทีเมื่อผู้ใช้เริ่มพิมพ์ใหม่
+['loginUsername', 'loginPassword'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => hideAlert(loginAlert));
+});
+
+['regUsername', 'regEmail', 'regPassword', 'regConfirm'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => hideAlert(registerAlert));
+});
+
 
 // ------------------------------------------
 // 🔐 SIGN IN
@@ -11,6 +43,7 @@ const registerForm = document.getElementById('registerForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    hideAlert(loginAlert);
 
     const usernameInput = document.getElementById('loginUsername');
     const passwordInput = document.getElementById('loginPassword');
@@ -23,7 +56,7 @@ if (loginForm) {
     const originalText = submitBtn.innerHTML;
 
     if (!username || !password) {
-      alert('กรุณากรอก Username และ Password');
+      showAlert(loginAlert, 'กรุณากรอก Username และ Password ให้ครบถ้วน');
       return;
     }
 
@@ -33,7 +66,7 @@ if (loginForm) {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        credentials: 'include', // ส่ง/รับ Session Cookie
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -49,7 +82,6 @@ if (loginForm) {
       }
 
       if (response.ok && data.status === 'success') {
-        // ตรวจสอบ Session อีกครั้งผ่าน /api/auth/me
         const sessionResponse = await fetch('/api/auth/me', {
           method: 'GET',
           credentials: 'include',
@@ -62,13 +94,11 @@ if (loginForm) {
           if (sessionData.status === 'success') {
             console.log('Login successful', sessionData.user);
 
-            // 👑 เช็กสิทธิ์ Role: ถ้าเป็น admin ให้ไปหน้า /admin
             if (sessionData.user && sessionData.user.role === 'admin') {
               window.location.replace('/admin');
               return;
             }
 
-            // ถ้าเป็น User ทั่วไป ไปหน้า generate
             window.location.replace('/generate');
             return;
           }
@@ -81,7 +111,13 @@ if (loginForm) {
 
     } catch (error) {
       console.error('Login Error:', error);
-      alert('เข้าสู่ระบบไม่สำเร็จ:\n' + error.message);
+      
+      // 🌟 ดักจับเคสเชื่อมต่อ Backend ไม่ได้
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        showAlert(loginAlert, '⚠️ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ Backend ได้ กรุณาตรวจสอบการเชื่อมต่อ');
+      } else {
+        showAlert(loginAlert, error.message);
+      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
@@ -89,12 +125,14 @@ if (loginForm) {
   });
 }
 
+
 // ------------------------------------------
 // 📝 SIGN UP / REGISTER
 // ------------------------------------------
 if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    hideAlert(registerAlert);
 
     const usernameInput = document.getElementById('regUsername');
     const emailInput = document.getElementById('regEmail');
@@ -111,12 +149,12 @@ if (registerForm) {
     const originalText = submitBtn.innerHTML;
 
     if (!username || !email || !password || !confirmPassword) {
-      alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+      showAlert(registerAlert, 'กรุณากรอกข้อมูลให้ครบทุกช่อง');
       return;
     }
 
     if (password !== confirmPassword) {
-      alert('❌ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง!');
+      showAlert(registerAlert, '❌ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง!');
       return;
     }
 
@@ -142,9 +180,9 @@ if (registerForm) {
       }
 
       if (response.ok) {
-        alert('✅ สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
         registerForm.reset();
         
+        // สลับไปหน้า Sign In อัตโนมัติเมื่อสมัครสำเร็จ
         const loginTabElement = document.getElementById('login-tab');
         if (loginTabElement && typeof bootstrap !== 'undefined') {
           const loginTab = new bootstrap.Tab(loginTabElement);
@@ -157,7 +195,13 @@ if (registerForm) {
 
     } catch (error) {
       console.error('Register Error:', error);
-      alert('สมัครสมาชิกไม่สำเร็จ:\n' + error.message);
+
+      // 🌟 ดักจับเคสเชื่อมต่อ Backend ไม่ได้
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        showAlert(registerAlert, '⚠️ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ Backend ได้ กรุณาตรวจสอบการเชื่อมต่อ');
+      } else {
+        showAlert(registerAlert, error.message);
+      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;

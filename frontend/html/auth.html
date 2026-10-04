@@ -6,7 +6,11 @@
   <title>LUMA AI - Sign In / Register</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=100">
+  <script>
+    const savedTheme = localStorage.getItem('luma_theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+  </script>
 </head>
 <body class="auth-body py-4">
 
@@ -32,9 +36,10 @@
 
           <!-- SIGN IN -->
           <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
-            <form id="loginForm">
+            <!-- 🔴 กล่องแจ้งเตือนฝั่ง Sign In -->
+            <div id="loginAlert" class="alert alert-danger d-none py-2 small mb-3 text-center border-0 shadow-sm" role="alert"></div>
 
-              <!-- เปลี่ยน Label เป็น Username or email -->
+            <form id="loginForm">
               <div class="mb-3">
                 <label for="loginUsername" class="form-label small text-light">Username or email</label>
                 <div class="input-group">
@@ -43,11 +48,10 @@
                 </div>
               </div>
 
-              <!-- Password -->
               <div class="mb-4">
                 <div class="d-flex justify-content-between">
                   <label for="loginPassword" class="form-label small text-light">Password</label>
-                  <a href="#" class="small text-decoration-none text-primary">Forgot password?</a>
+                  <a href="#" class="small text-decoration-none text-primary" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot password?</a>
                 </div>
                 <div class="input-group">
                   <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-lock"></i></span>
@@ -55,12 +59,15 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Sign In</button>
+              <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow">Sign In</button>
             </form>
           </div>
 
           <!-- SIGN UP -->
           <div class="tab-pane fade" id="register-pane" role="tabpanel">
+            <!-- 🔴 กล่องแจ้งเตือนฝั่ง Sign Up -->
+            <div id="registerAlert" class="alert alert-danger d-none py-2 small mb-3 text-center border-0 shadow-sm" role="alert"></div>
+
             <form id="registerForm">
               <div class="mb-3">
                 <label for="regUsername" class="form-label small text-light">Username</label>
@@ -94,7 +101,7 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-success w-100 fw-bold py-2">Create Account</button>
+              <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow">Create Account</button>
             </form>
           </div>
 
@@ -103,7 +110,42 @@
     </div>
   </div>
 
+  <!-- 📌 Modal Forgot Password -->
+  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light border border-secondary shadow-lg rounded-4">
+        
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title fw-bold text-info" id="forgotPasswordModalLabel">
+            <i class="bi bi-shield-lock-fill me-2"></i> ลืมรหัสผ่าน (Forgot Password)
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-headset display-3 text-warning"></i>
+          </div>
+          <h5 class="fw-bold mb-2">ต้องการรีเซ็ตรหัสผ่านใช่ไหมครับ?</h5>
+          <p class="text-muted small mb-4">
+            เนื่องจากระบบความปลอดภัย กรุณาติดต่อผู้ดูแลระบบ (Admin) หรือทีมพัฒนา เพื่อทำการตรวจสอบและรีเซ็ตรหัสผ่านใหม่อย่างปลอดภัยครับ
+          </p>
+
+          <div class="bg-secondary bg-opacity-25 p-3 rounded-3 border border-secondary text-start mb-3">
+            <p class="mb-2 small text-light"><i class="bi bi-envelope-fill text-info me-2"></i> <strong>Email Admin:</strong> admin@luma-ai.com</p>
+            <p class="mb-0 small text-light"><i class="bi bi-telephone-fill text-success me-2"></i> <strong>Support / Line:</strong> ติดต่อผ่านผู้ดูแลระบบประจำกลุ่ม</p>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top border-secondary justify-content-center">
+          <button type="button" class="btn btn-secondary px-4 fw-bold rounded-pill" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/auth.js?v=4"></script>
+  <script src="/js/auth.js?v=6"></script>
 </body>
 </html>

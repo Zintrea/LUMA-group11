@@ -1,5 +1,5 @@
 // ==========================================
-// 🛡️ ADMIN PANEL SCRIPT (LUMA AI)
+// 🛡️️ ADMIN PANEL SCRIPT (LUMA AI)
 // ==========================================
 
 // ตรวจสอบสิทธิ์ Admin
@@ -33,10 +33,10 @@ async function checkAdminSession() {
   }
 }
 
-// 1 & 2. โหลด Dashboard และ Recent Generations (แก้ Contract ให้ตรงกับ Backend)
+// 1 & 2. โหลด Dashboard และ Recent Generations
 async function loadDashboard() {
   try {
-    // 1. Dashboard: /api/admin/dashboard -> ใช้ data.stats
+    // 1. Dashboard Stats
     const res = await fetch('/api/admin/dashboard', { method: 'GET', credentials: 'include' });
     const data = await res.json();
     
@@ -48,24 +48,32 @@ async function loadDashboard() {
       document.getElementById('statAiForge').textContent = stats.ai_forge ?? '-';
     }
 
-    // 2. Recent Generations: /api/admin/recent-generations -> ใช้ data.generations
+    // 2. Recent Generations
     const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return; // ป้องกัน Error ถ้าหาตารางไม่เจอ
+
     const resGens = await fetch('/api/admin/recent-generations', { method: 'GET', credentials: 'include' });
     const dataGens = await resGens.json();
-
     const generationsList = dataGens.generations || [];
 
     if (resGens.ok && generationsList.length > 0) {
       tableBody.innerHTML = '';
       generationsList.forEach(item => {
         const modelDisplay = item.model ? item.model.split('\\').pop() : '-';
+        
+        let statusBadge = 'bg-secondary';
+        const statusStr = (item.status || '').toLowerCase();
+        if (statusStr === 'completed' || statusStr === 'success') statusBadge = 'bg-success';
+        else if (statusStr === 'failed' || statusStr === 'error') statusBadge = 'bg-danger';
+        else if (statusStr === 'processing' || statusStr === 'pending') statusBadge = 'bg-warning text-dark';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>#${item.task_id}</td>
           <td class="text-light fw-bold">${item.username}</td>
           <td class="text-truncate text-muted" style="max-width: 200px;">${item.prompt}</td>
           <td><small>${modelDisplay}</small></td>
-          <td><span class="badge bg-success">${item.status}</span></td>
+          <td><span class="badge ${statusBadge}">${item.status}</span></td>
           <td class="text-muted small">${item.created_at || '-'}</td>
         `;
         tableBody.appendChild(tr);
@@ -78,26 +86,31 @@ async function loadDashboard() {
   }
 }
 
-// 3. โหลด Users Management: /api/admin/users -> ใช้ data.users
+// 3. โหลด Users Management
 async function loadUsers() {
   const table = document.getElementById('tableUsers');
+  if (!table) return;
+
   try {
     const res = await fetch('/api/admin/users', { method: 'GET', credentials: 'include' });
     const data = await res.json();
-    
     const usersList = data.users || [];
 
     if (res.ok && usersList.length > 0) {
       table.innerHTML = '';
       usersList.forEach(user => {
         const isActive = user.is_active !== undefined ? user.is_active : user.status;
+        
+        const statusText = isActive ? 'Active' : 'Inactive';
+        const statusBadge = isActive ? 'bg-success' : 'bg-danger';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>#${user.id}</td>
           <td class="text-light fw-bold">${user.username}</td>
           <td class="text-muted">${user.email || '-'}</td>
           <td><span class="badge bg-secondary">${user.role}</span></td>
-          <td><span class="badge bg-success">${isActive}</span></td>
+          <td><span class="badge ${statusBadge}">${statusText}</span></td>
           <td class="text-muted small">${user.created_at || '-'}</td>
           <td class="text-end">
             <button class="btn btn-sm btn-outline-warning" onclick="openEditUser(${user.id}, '${user.username}', '${user.role}', ${isActive})">Edit</button>
@@ -121,52 +134,58 @@ function openEditUser(id, username, role, isActive) {
   new bootstrap.Modal(document.getElementById('editUserModal')).show();
 }
 
-// 5. แก้ไข User ผ่าน PATCH /api/admin/users/{id}
-document.getElementById('btnSaveUser').addEventListener('click', async () => {
-  const id = document.getElementById('editUserId').value;
-  const role = document.getElementById('editRole').value;
-  const is_active = document.getElementById('editStatus').value === "true";
+// 5. แก้ไข User ผ่าน PATCH
+const btnSaveUser = document.getElementById('btnSaveUser');
+if (btnSaveUser) {
+  btnSaveUser.addEventListener('click', async () => {
+    const id = document.getElementById('editUserId').value;
+    const role = document.getElementById('editRole').value;
+    const is_active = document.getElementById('editStatus').value === "true";
 
-  try {
-    const res = await fetch(`/api/admin/users/${id}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, is_active })
-    });
-    if (res.ok) {
-      bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-      loadUsers(); // Refresh รายชื่อหลังแก้สำเร็จ
-    } else {
-      alert('Update failed');
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, is_active })
+      });
+      if (res.ok) {
+        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+        loadUsers(); // Refresh รายชื่อหลังแก้สำเร็จ
+      } else {
+        alert('Update failed');
+      }
+    } catch (err) {
+      alert('Error connecting to server');
     }
-  } catch (err) {
-    alert('Error connecting to server');
-  }
-});
+  });
+}
 
-// 6 & 7. AI Server Settings & Models (ใช้ data.ai.status และ data.models)
+// 6 & 7. AI Server Settings & Models
 async function loadAISettings() {
   try {
     const res = await fetch('/api/admin/ai', { method: 'GET', credentials: 'include' });
     const data = await res.json();
     
-    // เช็คจาก ai.status ตาม Backend ส่งมา
     const aiStatus = data.ai ? data.ai.status : 'offline';
     const aiMessage = data.ai ? data.ai.message : 'Disconnected';
 
+    const mainText = document.getElementById('aiStatusMainText');
+    const messageText = document.getElementById('aiStatusMessage');
+
     if (res.ok && aiStatus === 'online') {
-      document.getElementById('aiStatusMainText').textContent = 'Online';
-      document.getElementById('aiStatusMessage').textContent = aiMessage;
+      if(mainText) mainText.textContent = 'Online';
+      if(messageText) messageText.textContent = aiMessage;
     } else {
-      document.getElementById('aiStatusMainText').textContent = 'Offline';
-      document.getElementById('aiStatusMessage').textContent = aiMessage;
+      if(mainText) mainText.textContent = 'Offline';
+      if(messageText) messageText.textContent = aiMessage;
     }
 
     const tableModels = document.getElementById('tableModels');
+    if (!tableModels) return;
+
     const resModels = await fetch('/api/admin/ai/models', { method: 'GET', credentials: 'include' });
     const dataModels = await resModels.json();
-    
     const modelsList = dataModels.models || [];
 
     if (resModels.ok && modelsList.length > 0) {
@@ -219,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 9. Logout
+  // Logout
   const btnLogout = document.getElementById('adminLogoutBtn');
   if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
