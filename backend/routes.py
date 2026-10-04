@@ -3,6 +3,7 @@ import psycopg2
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from hismat import hismat
+from blur import BLUR_RADII, blur_image
 from PIL import Image
 from io import BytesIO
 api = Blueprint("api", __name__)
@@ -1651,6 +1652,42 @@ def hismat_route():
             "status": "error",
             "message": str(e)
         }), 500
+
+
+@api.route("/blur", methods=["POST"])
+def blur_route():
+    if "image" not in request.files:
+        return jsonify({
+            "status": "error",
+            "message": "image is required"
+        }), 400
+
+    strength = request.form.get("strength", "medium")
+    if strength not in BLUR_RADII:
+        return jsonify({
+            "status": "error",
+            "message": "strength must be low, medium, or high"
+        }), 400
+
+    try:
+        source_image = Image.open(request.files["image"]).convert("RGB")
+        result = blur_image(source_image, BLUR_RADII[strength])
+
+        output = BytesIO()
+        result.save(output, format="PNG")
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype="image/png",
+            download_name="blur.png"
+        )
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "message": "cannot process image"
+        }), 415
+
 
 @api.route("/remove-background", methods=["POST"])
 def remove_background():
