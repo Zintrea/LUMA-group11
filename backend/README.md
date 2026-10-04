@@ -1,4 +1,9 @@
 LUMA Group 11 — Backend AI
+เข้ามาต้องเปลี่ยน IP Ai ที่App.py และ Env
+และเปลี่ยน IP Database ที่ตรง env
+
+
+
 
 Backend-AI เป็นส่วนกลางของระบบ LUMA Group 11 ทำหน้าที่เชื่อมต่อระหว่าง Frontend, Forge AI และ PostgreSQL รวมถึงจัดการ Authentication ของผู้ใช้
 
