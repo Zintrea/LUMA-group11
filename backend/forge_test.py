@@ -6,7 +6,7 @@ import requests
 # AI Forge Configuration
 # =========================
 
-FORGE_URL = "http://10.192.0.232:7860"
+FORGE_URL = "http://10.192.0.200:7860"
 
 
 # =========================

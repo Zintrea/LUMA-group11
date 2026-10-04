@@ -242,7 +242,34 @@ def ai_health():
 
     return jsonify(result), 503
 
+# =========================================
+# FEATURE HEALTH CHECK
+# =========================================
 
+def check_hismat():
+    try:
+        if callable(hismat):
+            return "ok"
+        return "error"
+    except Exception:
+        return "error"
+
+
+def check_remove_bg():
+    try:
+        response = requests.get(
+            current_app.config["REMBG_URL"],
+            timeout=5
+        )
+
+        if response.status_code < 500:
+            return "ok"
+
+        return "error"
+
+    except Exception:
+        return "error"
+    
 # =========================================
 # DATABASE HEALTH CHECK
 # =========================================
@@ -264,40 +291,38 @@ def db_health():
 # BACKEND + AI + DATABASE
 # =========================================
 
+# =========================================
+# READY CHECK
+# BACKEND + AI + DATABASE + FEATURES
+# =========================================
+
 @api.route("/ready", methods=["GET"])
 def ready():
 
-    # Backend
     backend_status = "ok"
 
-    # AI
     ai_result = check_ai()
-
-    # Database
     database_result = check_database()
 
-    # ตรวจสอบทั้งหมด
+    hismat_status = check_hismat()
+    remove_bg_status = check_remove_bg()
+
     all_ready = (
         backend_status == "ok"
         and ai_result["status"] == "ok"
         and database_result["status"] == "ok"
+        and hismat_status == "ok"
+        and remove_bg_status == "ok"
     )
 
-    if all_ready:
-
-        return jsonify({
-            "status": "ready",
-            "backend": "ok",
-            "ai": "ok",
-            "database": "ok"
-        }), 200
-
     return jsonify({
-        "status": "not_ready",
+        "status": "ready" if all_ready else "not_ready",
         "backend": backend_status,
         "ai": ai_result["status"],
-        "database": database_result["status"]
-    }), 503
+        "database": database_result["status"],
+        "hismat": hismat_status,
+        "remove_bg": remove_bg_status
+    }), 200 if all_ready else 503
 
 # =========================================
 # ADMIN - DASHBOARD
@@ -1626,3 +1651,60 @@ def hismat_route():
             "status": "error",
             "message": str(e)
         }), 500
+
+@api.route("/remove-background", methods=["POST"])
+def remove_background():
+
+    if "user_id" not in session:
+        return jsonify({"error": "Login required"}), 401
+
+    if "image" not in request.files:
+        return jsonify({"error": "No image"}), 400
+
+    image = request.files["image"]
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO image_tasks (user_id, task_type, status, prompt_text)
+        VALUES (%s, 'remove_bg', 'processing', %s)
+        RETURNING id
+    """, (session["user_id"], "Background Removal"))
+
+    task_id = cur.fetchone()[0]
+    conn.commit()
+
+    try:
+        response = requests.post(
+            f"{current_app.config['REMBG_URL']}/api/remove",
+            files={"image": (image.filename, image.stream, image.mimetype)},
+            timeout=120
+        )
+
+        response.raise_for_status()
+
+        cur.execute(
+            "UPDATE image_tasks SET status='completed' WHERE id=%s",
+            (task_id,)
+        )
+        conn.commit()
+
+        return send_file(
+            BytesIO(response.content),
+            mimetype="image/png",
+            download_name="background_removed.png"
+        )
+
+    except Exception as e:
+        cur.execute(
+            "UPDATE image_tasks SET status='failed' WHERE id=%s",
+            (task_id,)
+        )
+        conn.commit()
+
+        return jsonify({"error": str(e), "task_id": task_id}), 500
+
+    finally:
+        cur.close()
+        conn.close()

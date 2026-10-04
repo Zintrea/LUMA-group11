@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-
+from flask import Blueprint, jsonify, request, current_app, session
 import psycopg2
 from dotenv import load_dotenv
 from flask import Flask
@@ -38,8 +38,10 @@ CORS(app, supports_credentials=True)
 
 FORGE_URL = os.getenv(
     "FORGE_URL",
-    "http://10.192.1.91:7860"
+    "http://10.192.0.200:7860"
 )
+
+REMBG_URL = os.getenv("REMBG_URL")
 
 DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
@@ -48,11 +50,14 @@ DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
 app.config["FORGE_URL"] = FORGE_URL
+app.config["REMBG_URL"] = REMBG_URL
+app.config["FORGE_URL"] = FORGE_URL
 app.config["DATABASE_HOST"] = DATABASE_HOST
 app.config["DATABASE_PORT"] = DATABASE_PORT
 app.config["DATABASE_NAME"] = DATABASE_NAME
 app.config["DATABASE_USER"] = DATABASE_USER
 app.config["DATABASE_PASSWORD"] = DATABASE_PASSWORD
+
 
 # =========================================
 # ROUTES
@@ -88,6 +93,7 @@ if __name__ == "__main__":
     )
 
     print("Forge URL:", FORGE_URL)
+    print("REMBG URL:", REMBG_URL)
 
     print("-----------------------------------------")
 
