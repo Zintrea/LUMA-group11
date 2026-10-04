@@ -4,16 +4,19 @@ set "ROOT=%~dp0"
 set "VENV=%ROOT%.venv"
 set "PYTHON=%VENV%\Scripts\python.exe"
 
-py -3.11 -c "import sys; print(sys.version)" >nul 2>&1
+set "BOOTSTRAP_PY=python"
+
+"%BOOTSTRAP_PY%" -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) else 1)" >nul 2>&1
 if errorlevel 1 (
-  echo ERROR: Python 3.11 x64 is required. Install it, then run this script again.
+  echo ERROR: Python 3.11 x64 is required, but the `python` command is not Python 3.11.
+  echo Run `python --version` in PowerShell to check the installed version.
   pause
   exit /b 1
 )
 
 if not exist "%PYTHON%" (
-  echo Creating isolated Python 3.11 environment...
-  py -3.11 -m venv "%VENV%"
+  echo Creating isolated Python 3.11 environment from the installed python command...
+  "%BOOTSTRAP_PY%" -m venv "%VENV%"
   if errorlevel 1 (
     echo ERROR: Cannot create .venv.
     pause
