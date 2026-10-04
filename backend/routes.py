@@ -254,7 +254,7 @@ def check_blur():
         return "error"
     except Exception:
         return "error"
-    
+
 # =========================================
 # FEATURE HEALTH CHECK
 # =========================================
@@ -1718,7 +1718,6 @@ def blur_route():
             "message": "cannot process image"
         }), 415
 
-    
 
 
 @api.route("/remove-background", methods=["POST"])
