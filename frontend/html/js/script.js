@@ -491,6 +491,89 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
+// 🌫️ ฟีเจอร์ BASIC IMAGE BLUR
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  const blurForm = document.getElementById('blurForm');
+  const blurImageInput = document.getElementById('blurImage');
+  const blurStrengthInput = document.getElementById('blurStrength');
+  const btnBlur = document.getElementById('btnBlur');
+  const blurEmptyState = document.getElementById('blurEmptyState');
+  const blurLoadingState = document.getElementById('blurLoadingState');
+  const blurResultImage = document.getElementById('blurResultImage');
+  const btnBlurDownload = document.getElementById('btnBlurDownload');
+
+  if (blurForm) {
+    blurForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const rawImage = blurImageInput.files[0];
+      if (!rawImage) {
+        alert('กรุณาอัปโหลดรูปภาพก่อน');
+        return;
+      }
+
+      const originalButtonText = btnBlur.innerHTML;
+      btnBlur.disabled = true;
+      btnBlur.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Blurring...';
+      blurEmptyState.classList.add('d-none');
+      blurResultImage.classList.add('d-none');
+      btnBlurDownload.classList.add('d-none');
+      blurLoadingState.classList.remove('d-none');
+
+      try {
+        const image = await compressImage(rawImage);
+        const formData = new FormData();
+        formData.append('image', image);
+        formData.append('strength', blurStrengthInput.value);
+
+        const response = await fetch('/api/blur', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          let message = `เซิร์ฟเวอร์ตอบกลับผิดพลาด (HTTP ${response.status})`;
+          try {
+            const data = await response.json();
+            message = data.message || data.error || message;
+          } catch (error) {
+            // Keep the HTTP status message when the error body is not JSON.
+          }
+          throw new Error(message);
+        }
+
+        const imageBlob = await response.blob();
+        blurResultImage.src = URL.createObjectURL(imageBlob);
+        blurResultImage.classList.remove('d-none');
+        btnBlurDownload.classList.remove('d-none');
+      } catch (error) {
+        alert('เบลอรูปภาพไม่สำเร็จ: ' + error.message);
+        blurEmptyState.classList.remove('d-none');
+      } finally {
+        blurLoadingState.classList.add('d-none');
+        btnBlur.disabled = false;
+        btnBlur.innerHTML = originalButtonText;
+      }
+    });
+  }
+
+  if (btnBlurDownload) {
+    btnBlurDownload.addEventListener('click', () => {
+      if (!blurResultImage.src) return;
+
+      const link = document.createElement('a');
+      link.href = blurResultImage.src;
+      link.download = `LUMA_Blur_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+});
+
+// ==========================================
 // 🪄 ฟีเจอร์ BACKGROUND REMOVAL (ลบพื้นหลัง)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
