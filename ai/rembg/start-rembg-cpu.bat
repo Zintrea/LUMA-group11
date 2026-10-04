@@ -6,6 +6,7 @@ set "PID_FILE=%ROOT%rembg.pid"
 
 if not exist "%PYTHON%" (
   echo ERROR: rembg is not installed yet. Run setup-rembg-cpu.bat first.
+  pause
   exit /b 1
 )
 
@@ -14,6 +15,7 @@ if not errorlevel 1 goto port_free
 
 echo ERROR: Port 7000 is already listening. Do not start a second service.
 echo Run stop-rembg-cpu.bat only if it belongs to this LUMA rembg service.
+pause
 exit /b 1
 
 :port_free
@@ -33,6 +35,7 @@ powershell -NoProfile -Command "$listener = @(Get-NetTCPConnection -LocalPort 70
 if errorlevel 1 (
   echo ERROR: Service did not open port 7000.
   echo Check: %ERR_LOG%
+  pause
   exit /b 1
 )
 
@@ -40,3 +43,4 @@ echo PASS: LUMA rembg CPU service is running.
 echo PC3 contract: POST http://^<PC2-IP^>:7000/api/remove
 echo Multipart field: image
 echo Runtime logs: %ROOT%logs
+pause

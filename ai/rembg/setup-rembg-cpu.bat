@@ -7,6 +7,7 @@ set "PYTHON=%VENV%\Scripts\python.exe"
 py -3.11 -c "import sys; print(sys.version)" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: Python 3.11 x64 is required. Install it, then run this script again.
+  pause
   exit /b 1
 )
 
@@ -15,7 +16,8 @@ if not exist "%PYTHON%" (
   py -3.11 -m venv "%VENV%"
   if errorlevel 1 (
     echo ERROR: Cannot create .venv.
-        exit /b 1
+    pause
+    exit /b 1
   )
 )
 
@@ -28,9 +30,11 @@ echo Installing pinned CPU dependencies...
 "%PYTHON%" -m pip install -r "%ROOT%requirements-cpu.txt"
 if errorlevel 1 (
   echo ERROR: Dependency installation failed. Check the internet connection and try again.
+  pause
   exit /b 1
 )
 
 echo.
 echo PASS: Setup complete.
 echo Next step: double-click start-rembg-cpu.bat
+pause

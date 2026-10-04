@@ -22,3 +22,4 @@ if errorlevel 1 (
 
 del "%PID_FILE%"
 echo PASS: LUMA rembg service stopped.
+pause
