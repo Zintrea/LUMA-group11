@@ -17,6 +17,9 @@ node_modules/
 *.pth
 
 forge_test.png
+# --- ซ่อนโฟลเดอร์ขยะของ Nginx ไม่ให้อัปขึ้น Git ---
+logs/
+temp/
 
 # LUMA PC2 rembg local runtime
 ai/rembg/.venv/

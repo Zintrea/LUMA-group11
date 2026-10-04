@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LUMA - AI Workspace</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    const savedTheme = localStorage.getItem('luma_theme') || 'dark';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+  </script>
+</head>
+<body class="bg-dark">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg topbar px-3 py-2 navbar-dark border-bottom border-secondary">
+    <div class="container-fluid p-0">
+      <a class="navbar-brand text-white fw-bold me-4 text-decoration-none" href="/">
+        <i class="bi bi-stars text-primary"></i> LUMA Group11
+      </a>
+      <!-- ปุ่มเข้าหน้า Admin (ค่าเริ่มต้นใส่ d-none เพื่อซ่อนไว้ก่อน) -->
+      <a href="/admin.html" id="adminPanelBtn" class="btn btn-outline-warning btn-sm d-none fw-bold mx-2">
+        <i class="bi bi-shield-lock-fill me-1"></i> Admin Panel
+      </a>
+      <div class="d-flex align-items-center ms-auto">
+        <!-- ปุ่มเปลี่ยนธีม -->
+        <button id="themeToggleBtn" class="btn btn-outline-secondary rounded-circle me-3 d-flex align-items-center justify-content-center shadow-sm" type="button" style="width: 38px; height: 38px;">
+          <i id="themeIcon" class="bi bi-sun-fill"></i>
+        </button>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center text-white border-0 bg-transparent" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://ui-avatars.com/api/?name=User&background=random" id="navProfilePic" class="rounded-circle me-2 shadow-sm" style="width: 35px; height: 35px; object-fit: cover;">
+            <span id="currentUser" class="fw-bold me-1">User</span>
+          </button>
+          
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg mt-2 border-secondary">
+            <li class="px-3 py-2 text-center border-bottom border-secondary mb-2">
+              <span class="d-block small text-muted mb-1">Available Credits</span>
+              <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">Unlimited</span>
+            </li>
+            <li>
+              <button class="dropdown-item py-2 text-danger fw-bold" id="btnLogoutDropdown">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= แถบเลือกโหมดเครื่องมือ (Tabs Menu) ================= -->
+  <div class="bg-dark border-bottom border-secondary p-2 d-flex justify-content-start ps-4 shadow-sm">
+    <ul class="nav nav-pills" id="workspaceTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-bold px-4 rounded-pill" id="tab-generate" data-bs-toggle="pill" data-bs-target="#pane-generate" type="button" role="tab">
+          <i class="bi bi-magic me-2"></i> AI Image Generator
+        </button>
+      </li>
+      <li class="nav-item ms-2" role="presentation">
+        <button class="nav-link fw-bold px-4 rounded-pill" id="tab-hismat" data-bs-toggle="pill" data-bs-target="#pane-hismat" type="button" role="tab">
+          <i class="bi bi-palette-fill me-2"></i> Color Matching 
+        </button>
+      </li>
+      <li class="nav-item ms-2" role="presentation">
+        <button class="nav-link fw-bold px-4 rounded-pill" id="tab-blur" data-bs-toggle="pill" data-bs-target="#pane-blur" type="button" role="tab">
+          <i class="bi bi-droplet-half me-2"></i> Blur Image
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold px-4 rounded-pill" id="tab-removebg" data-bs-toggle="pill" data-bs-target="#pane-removebg" type="button" role="tab">
+          <i class="bi bi-eraser-fill me-2"></i> Background Removal
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ================= พื้นที่ทำงาน (Tab Content) ================= -->
+  <div class="tab-content container-fluid p-0" id="workspaceTabsContent">
+    
+    <!-- 🎯 1. แท็บ GENERATE IMAGE (โค้ดเดิม) -->
+    <div class="tab-pane fade show active" id="pane-generate" role="tabpanel">
+      <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-md-4 col-lg-3 sidebar p-4 border-end border-secondary" style="min-height: calc(100vh - 120px);">
+          <h6 class="text-uppercase text-muted fw-bold mb-3 small">Prompt Engineering</h6>
+          <div class="mb-3">
+            <label class="form-label small text-light">Prompt</label>
+            <textarea class="form-control bg-dark text-light border-secondary shadow-sm" id="promptInput" rows="4"></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="form-label small text-muted">Negative Prompt</label>
+            <textarea class="form-control bg-dark text-light border-secondary shadow-sm" id="negativePromptInput" rows="3"></textarea>
+          </div>
+          <hr class="border-secondary">
+          <div class="mb-4">
+            <label class="form-label small text-muted">AI Model</label>
+            <select class="form-select bg-dark text-light border-secondary shadow-sm" id="aiModel">
+              <option value="Realistic">Realistic / Photography</option>
+              <option value="Anime">Anime / 2D Art</option>
+            </select>
+          </div>
+          <button id="btnGenerate" class="btn btn-primary w-100 fw-bold py-2 shadow"><i class="bi bi-magic me-1"></i> Generate Image</button>
+        </div>
+        <!-- Workspace Area -->
+        <div class="col-md-8 col-lg-9 workspace d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="min-height: calc(100vh - 120px);">
+          <div id="imageResultContainer" class="text-center p-4">
+            <span id="emptyState" class="text-muted d-block p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-50">
+              <i class="bi bi-image display-4 d-block mb-3 text-secondary"></i> AI generated image will appear here
+            </span>
+            <div id="loadingState" class="d-none text-center p-5">
+              <div class="spinner-border text-primary mb-3" style="width: 4rem; height: 4rem;"></div>
+              <h5 class="text-light fw-bold">Generating image...</h5>
+            </div>
+            <img id="resultImage" class="d-none img-fluid shadow-lg rounded" src="" style="max-height: 70vh; object-fit: contain;">
+            <div id="downloadContainer" class="d-none text-center mt-4">
+              <button id="btnDownload" class="btn btn-success fw-bold px-4 py-2"><i class="bi bi-download me-2"></i> Save Image</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🎨 2. แท็บ COLOR MATCHING (รองรับทั้ง Preset และ Custom Upload) -->
+    <div class="tab-pane fade" id="pane-hismat" role="tabpanel">
+      <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-md-4 col-lg-3 sidebar p-4 border-end border-secondary" style="min-height: calc(100vh - 120px);">
+          <h6 class="text-uppercase text-muted fw-bold mb-3 small">Histogram Matching</h6>
+          <p class="small text-muted mb-4">ย้อมสีรูปภาพต้นฉบับด้วยโทนสีสำเร็จรูปหรือรูปภาพอ้างอิงของคุณ</p>
+          
+          <form id="hismatForm">
+            <!-- 1. Source Image -->
+            <div class="mb-4">
+              <label class="form-label small text-light fw-bold">1. Source Image (รูปต้นฉบับ)</label>
+              <input type="file" class="form-control bg-dark text-light border-secondary shadow-sm" id="sourceImage" accept="image/*" required>
+            </div>
+
+            <!-- 2. เลือกโหมด: โทนสีสำเร็จรูป vs อัปโหลดรูปเอง -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label small text-info fw-bold m-0">2. Reference Source</label>
+                <!-- ปุ่มสลับโหมด -->
+                <div class="btn-group btn-group-sm" role="group">
+                  <input type="radio" class="btn-check" name="refMode" id="modePreset" value="preset" checked>
+                  <label class="btn btn-outline-info py-0 px-2" for="modePreset">เลือกโทนสี</label>
+
+                  <input type="radio" class="btn-check" name="refMode" id="modeCustom" value="custom">
+                  <label class="btn btn-outline-info py-0 px-2" for="modeCustom">อัปโหลดรูป</label>
+                </div>
+              </div>
+
+              <!-- โหมดที่ A: ปุ่มเลือกโทนสีสำเร็จรูป (แสดงเป็นค่าเริ่มต้น) -->
+              <div id="presetToneContainer">
+                <div class="row g-2">
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="colorTone" id="toneWarm" value="warm" checked>
+                    <label class="btn btn-outline-warning w-100 py-2 small fw-bold text-center px-1" for="toneWarm">
+                      <i class="bi bi-sunrise-fill d-block mb-1 fs-5"></i> โทนอุ่น
+                    </label>
+                  </div>
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="colorTone" id="toneCool" value="cool">
+                    <label class="btn btn-outline-info w-100 py-2 small fw-bold text-center px-1" for="toneCool">
+                      <i class="bi bi-moon-stars-fill d-block mb-1 fs-5"></i> โทนเย็น
+                    </label>
+                  </div>
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="colorTone" id="toneVintage" value="vintage">
+                    <label class="btn btn-outline-secondary w-100 py-2 small fw-bold text-center px-1" for="toneVintage">
+                      <i class="bi bi-film d-block mb-1 fs-5"></i> วินเทจ
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- โหมดที่ B: ช่องอัปโหลดรูปภาพอ้างอิงเอง (ซ่อนไว้ก่อนจนกว่าจะกดเลือก) -->
+              <div id="customFileContainer" class="d-none">
+                <input type="file" class="form-control bg-dark text-light border-info shadow-sm" id="referenceImage" accept="image/*">
+                <div class="form-text text-muted small mt-1">อัปโหลดรูปภาพเพื่อดึงโทนสีมาใช้เทียบเคียง</div>
+              </div>
+            </div>
+
+            <hr class="border-secondary mb-4">
+            
+            <button type="submit" class="btn btn-info text-dark w-100 fw-bold py-2 shadow" id="btnHismat">
+              <i class="bi bi-palette-fill me-1"></i> Apply Color Match
+            </button>
+          </form>
+        </div>
+
+        <!-- Workspace Area -->
+        <div class="col-md-8 col-lg-9 workspace d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="min-height: calc(100vh - 120px);">
+          <div id="hismatWorkspaceContainer" class="text-center p-4">
+            <span id="hismatEmptyState" class="text-muted d-block p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-50">
+              <i class="bi bi-images display-4 d-block mb-3 text-secondary"></i> Matched image will appear here
+            </span>
+            <div id="hismatLoadingState" class="d-none text-center p-5">
+              <div class="spinner-border text-info mb-3" style="width: 4rem; height: 4rem;"></div>
+              <h5 class="text-light fw-bold">Processing colors...</h5>
+            </div>
+            <img id="hismatResultImage" class="d-none img-fluid shadow-lg rounded" src="" style="max-height: 70vh; object-fit: contain;">
+            <div class="text-center mt-4">
+              <button id="btnHismatDownload" class="btn btn-success fw-bold px-4 py-2 d-none"><i class="bi bi-download me-2"></i> Save Result</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🌫️ 3. แท็บ BASIC IMAGE BLUR -->
+    <div class="tab-pane fade" id="pane-blur" role="tabpanel">
+      <div class="row g-0">
+        <div class="col-md-4 col-lg-3 sidebar p-4 border-end border-secondary" style="min-height: calc(100vh - 120px);">
+          <h6 class="text-uppercase text-muted fw-bold mb-3 small">Basic Image Blur</h6>
+          <p class="small text-muted mb-4">เบลอภาพทั้งภาพด้วย Gaussian Blur</p>
+
+          <form id="blurForm">
+            <div class="mb-4">
+              <label class="form-label small text-light fw-bold">1. Upload Image</label>
+              <input type="file" class="form-control bg-dark text-light border-secondary shadow-sm" id="blurImage" accept="image/*" required>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small text-light fw-bold">2. Blur Strength</label>
+              <select class="form-select bg-dark text-light border-secondary" id="blurStrength" name="blurStrength">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-secondary text-white w-100 fw-bold py-2 shadow" id="btnBlur">
+              <i class="bi bi-droplet-half me-1"></i> Blur Image
+            </button>
+          </form>
+        </div>
+
+        <div class="col-md-8 col-lg-9 workspace d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="min-height: calc(100vh - 120px);">
+          <div class="text-center p-4">
+            <span id="blurEmptyState" class="text-muted d-block p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-50">
+              <i class="bi bi-image display-4 d-block mb-3 text-secondary"></i> Blurred image will appear here
+            </span>
+            <div id="blurLoadingState" class="d-none text-center p-5">
+              <div class="spinner-border text-secondary mb-3" style="width: 4rem; height: 4rem;"></div>
+              <h5 class="text-light fw-bold">Blurring image...</h5>
+            </div>
+            <img id="blurResultImage" class="d-none img-fluid shadow-lg rounded" src="" style="max-height: 70vh; object-fit: contain;">
+            <div class="text-center mt-4">
+              <button id="btnBlurDownload" class="btn btn-success fw-bold px-4 py-2 d-none"><i class="bi bi-download me-2"></i> Save Result</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- 🎨 4. แท็บ BACKGROUND REMOVAL -->
+    <div class="tab-pane fade" id="pane-removebg" role="tabpanel">
+      <div class="row g-0">
+        
+        <!-- Sidebar -->
+        <div class="col-md-4 col-lg-3 sidebar p-4 border-end border-secondary" style="min-height: calc(100vh - 120px);">
+          <h6 class="text-uppercase text-muted fw-bold mb-3 small">Background Removal</h6>
+          <p class="small text-muted mb-4">ลบพื้นหลังรูปภาพด้วย AI อัตโนมัติ (รองรับไฟล์สูงสุด 15MB)</p>
+          
+          <form id="removeBgForm">
+            <!-- กล่องแจ้งเตือน -->
+            <div id="bgAlert" class="alert alert-danger d-none py-2 small mb-3 text-center" role="alert"></div>
+
+            <!-- กล่องลากวางรูปภาพ (Drag & Drop) -->
+            <div class="mb-4">
+              <label class="form-label small text-light fw-bold">Upload Image</label>
+              
+              <div id="bgDropZone" class="drop-zone mb-3">
+                <i class="bi bi-cloud-arrow-up display-4 text-info mb-2 d-block"></i>
+                <span class="small text-light">ลากไฟล์รูปภาพมาวางที่นี่<br>หรือคลิกเพื่อเลือกไฟล์</span>
+                <input type="file" id="bgImageInput" class="d-none" accept="image/png, image/jpeg, image/webp" required>
+              </div>
+
+              <!-- Preview รูปต้นฉบับ -->
+              <div id="bgOriginalPreviewContainer" class="d-none text-center">
+                <p class="small text-info mb-1 fw-bold">Original Preview:</p>
+                <img id="bgOriginalPreview" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: contain;">
+                <button type="button" id="btnBgReset" class="btn btn-sm btn-outline-danger w-100 mt-2">ลบรูป / เลือกใหม่</button>
+              </div>
+            </div>
+
+            <hr class="border-secondary mb-4">
+            
+            <button type="submit" class="btn btn-primary text-white w-100 fw-bold py-2 shadow" id="btnRemoveBg" disabled>
+              <i class="bi bi-eraser-fill me-1"></i> Remove Background
+            </button>
+          </form>
+        </div>
+
+        <!-- Workspace Area (แสดงผล) -->
+        <div class="col-md-8 col-lg-9 workspace d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="min-height: calc(100vh - 120px);">
+          <div class="text-center p-4 w-100">
+            
+            <!-- สถานะว่างเปล่า -->
+            <span id="bgEmptyState" class="text-muted d-block p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-50 mx-auto" style="max-width: 500px;">
+              <i class="bi bi-image display-4 d-block mb-3 text-secondary"></i> Transparent image will appear here
+            </span>
+            
+            <!-- สถานะกำลังโหลด -->
+            <div id="bgLoadingState" class="d-none text-center p-5">
+              <div class="spinner-border text-primary mb-3" style="width: 4rem; height: 4rem;"></div>
+              <h5 class="text-light fw-bold">Removing Background...</h5>
+              <p class="text-muted small">AI กำลังประมวลผล อาจใช้เวลาสักครู่...</p>
+            </div>
+            
+            <!-- รูปผลลัพธ์ (คลาส bg-checkerboard จะทำให้เห็นตารางหมากรุก) -->
+            <div id="bgResultContainer" class="d-none">
+              <img id="bgResultImage" class="img-fluid shadow-lg rounded bg-checkerboard mx-auto d-block" src="" style="max-height: 60vh; object-fit: contain;">
+              <div class="mt-4">
+                <button id="btnBgDownload" class="btn btn-success fw-bold px-4 py-2 shadow">
+                  <i class="bi bi-download me-2"></i> Download Transparent PNG
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- อย่าลืมเปลี่ยนเลขเวอร์ชัน หรือกดเคลียร์แคช เพื่อให้เบราว์เซอร์ดึงไฟล์ใหม่ -->
+  <script src="/js/script.js?v=20"></script>
+  <script src="/js/theme.js"></script>
+  
+</body>
+</html>

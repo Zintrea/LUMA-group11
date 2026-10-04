@@ -1,0 +1,265 @@
+/* =========================================
+   LUMA Global Styles (Dark Mode - Default)
+========================================= */
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  /* เพิ่ม transition ให้เปลี่ยนธีมแบบนุ่มนวล */
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+/* Navbar (Topbar) */
+.topbar {
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #2d2d2d;
+  height: 60px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Sidebar (ฝั่งซ้ายตั้งค่า Prompt) */
+.sidebar {
+  background-color: #181818;
+  border-right: 1px solid #2d2d2d;
+  min-height: calc(100vh - 60px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Workspace (ฝั่งขวาแสดงรูป) */
+.workspace {
+  background-color: #121212;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+#imageResultContainer {
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+#resultImage {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* =========================================
+   หน้า Authentication (Login & Register) 
+========================================= */
+.auth-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #121212;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* =========================================
+   หน้า Home (Landing Page)
+========================================= */
+.hero-section {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1f1f1f 0%, #121212 100%);
+  transition: background 0.3s ease;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  letter-spacing: -1px;
+}
+
+/* =========================================
+   หน้า Admin Panel
+========================================= */
+.admin-body { 
+  background-color: #121212; 
+  overflow-x: hidden; 
+}
+
+/* Sidebar ของหน้า Admin */
+.admin-sidebar { 
+  min-height: 100vh; 
+  background-color: #1a1a1a; 
+  border-right: 1px solid #333; 
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.admin-sidebar .nav-link { 
+  color: #aaa; 
+  transition: 0.2s; 
+}
+.admin-sidebar .nav-link:hover, .admin-sidebar .nav-link.active { 
+  color: #fff; 
+  background-color: #2d2d2d; 
+  border-radius: 8px; 
+}
+
+/* การ์ดและตารางในหน้า Admin */
+.admin-card { 
+  background-color: #1e1e1e; 
+  border: 1px solid #333; 
+  border-radius: 12px; 
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.admin-icon-box { 
+  width: 48px; 
+  height: 48px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 10px; 
+  font-size: 1.5rem; 
+}
+.table-dark { 
+  --bs-table-bg: transparent; 
+}
+
+/* ==============================================================
+   LUMA Global Styles (Light Mode Overrides - แบบบังคับทะลวง Bootstrap)
+============================================================== */
+
+/* 1. บังคับเปลี่ยนสีพื้นหลังและสีตัวอักษรหลัก */
+[data-bs-theme="light"] body,
+[data-bs-theme="light"] .auth-body,
+[data-bs-theme="light"] .admin-body,
+[data-bs-theme="light"] .workspace {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+}
+
+/* 2. บังคับเปลี่ยนคลาส text-white และ text-light ให้กลายเป็นสีดำ */
+[data-bs-theme="light"] .text-white,
+[data-bs-theme="light"] .text-light,
+[data-bs-theme="light"] .navbar-brand {
+  color: #212529 !important;
+}
+
+/* 3. บังคับเปลี่ยนสีพื้นหลังที่ถูกล็อคด้วย bg-dark */
+[data-bs-theme="light"] .bg-dark,
+[data-bs-theme="light"] .admin-card,
+[data-bs-theme="light"] .sidebar,
+[data-bs-theme="light"] .admin-sidebar {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+}
+
+/* 4. เปลี่ยนแสง Gradient หน้า Home */
+[data-bs-theme="light"] .hero-section {
+  background: radial-gradient(circle at center, #ffffff 0%, #e9ecef 100%) !important;
+}
+
+/* 5. เปลี่ยนสีแถบ Navbar */
+[data-bs-theme="light"] .topbar {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* 6. ปรับแต่งเมนูที่กดเลือกใน Admin Sidebar */
+[data-bs-theme="light"] .admin-sidebar .nav-link { color: #495057 !important; }
+[data-bs-theme="light"] .admin-sidebar .nav-link:hover, 
+[data-bs-theme="light"] .admin-sidebar .nav-link.active { 
+  color: #0d6efd !important; 
+  background-color: #e9ecef !important; 
+}
+
+/* 7. ปรับตารางในหน้า Admin */
+[data-bs-theme="light"] .table-dark { 
+  --bs-table-color: #212529; 
+  --bs-table-border-color: #dee2e6; 
+}
+[data-bs-theme="light"] .table-dark th {
+  background-color: #f1f3f5 !important;
+  border-bottom: 2px solid #dee2e6 !important;
+  color: #495057 !important;
+}
+[data-bs-theme="light"] .table-dark td { border-bottom: 1px solid #dee2e6 !important; }
+
+/* โค้ดบังคับเปลี่ยนสีแบบด่วน (เพื่อทดสอบว่าระบบธีมทำงาน) */
+[data-bs-theme="light"] body,
+[data-bs-theme="light"] .hero-section {
+  background: #f8f9fa !important;
+}
+[data-bs-theme="light"] .text-white,
+[data-bs-theme="light"] .hero-title {
+  color: #212529 !important;
+}
+
+/* 🌟 บังคับเปลี่ยนสีตอนเอาเมาส์ชี้ในตาราง (Light Mode) ให้เป็นสีเทาอ่อนที่สุดแบบเด็ดขาด */
+[data-bs-theme="light"] .table-hover > tbody > tr:hover > *,
+[data-bs-theme="light"] .table tbody tr:hover {
+  background-color: #fcfcfc !important; /* สีเทาอ่อนเกือบขาวแบบละมุนที่สุด */
+  color: #212529 !important;
+}
+
+/* 🌟 เมื่อเอาเมาส์ไปชี้ใน Light Mode ให้ตัวหนังสือทุกตัวเปลี่ยนเป็นสีขาวสว่างเด่นชัด */
+[data-bs-theme="light"] .table tbody tr:hover td,
+[data-bs-theme="light"] .table tbody tr:hover th,
+[data-bs-theme="light"] .table tbody tr:hover span,
+[data-bs-theme="light"] .table tbody tr:hover a,
+[data-bs-theme="light"] .table tbody tr:hover div {
+  color: #ffffff !important; /* เปลี่ยนตัวหนังสือเป็นสีขาวสว่าง */
+}
+
+/* 🌟 แก้ไขปุ่ม Sign In ใน Navbar ให้มองเห็นชัดเจนใน Light Mode */
+[data-bs-theme="light"] .navbar .btn-outline-light,
+[data-bs-theme="light"] a.btn-outline-light {
+  color: #212529 !important;          /* ตัวหนังสือสีเข้ม */
+  border-color: #ced4da !important;   /* ขอบสีเทาชัดเจน */
+  background-color: transparent !important;
+}
+
+/* ตอนเอาเมาส์ไปชี้ให้เปลี่ยนเป็นสีเข้มขึ้นเล็กน้อย */
+[data-bs-theme="light"] .navbar .btn-outline-light:hover,
+[data-bs-theme="light"] a.btn-outline-light:hover {
+  background-color: #e9ecef !important;
+  color: #000000 !important;
+  border-color: #adb5bd !important;
+}
+
+/* 🌟 พื้นหลังตารางหมากรุกสำหรับแสดงผลภาพโปร่งใส (Transparent PNG) */
+.bg-checkerboard {
+  background-color: #ffffff;
+  background-image: 
+    linear-gradient(45deg, #e0e0e0 25%, transparent 25%), 
+    linear-gradient(-45deg, #e0e0e0 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #e0e0e0 75%), 
+    linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  border: 1px solid #dee2e6;
+}
+
+/* สไตล์กรอบลากวางไฟล์ (Drag & Drop) */
+.drop-zone {
+  border: 2px dashed #6c757d;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background-color: rgba(0,0,0,0.2);
+}
+.drop-zone.dragover {
+  border-color: #0dcaf0;
+  background-color: rgba(13, 202, 240, 0.1);
+}
