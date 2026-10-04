@@ -1,7 +1,15 @@
 LUMA Group 11 — Backend AI
+
+เอกสาร Feature Basic Image Blur:
+
+```text
+- backend/BLUR-README.md   Quick Start และ API Contract
+- backend/BLUR-LOGBOOK.md  ขั้นตอนติดตั้ง ทดสอบ และ Troubleshooting
+```
+
 เข้ามาต้องเปลี่ยน IP Ai ที่App.py และ Env
 และเปลี่ยน IP Database ที่ตรง env
-
+..\venv\Scripts\python.exe app.py  คำสั่งรัน app.py
 
 
 

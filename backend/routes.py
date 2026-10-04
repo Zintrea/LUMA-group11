@@ -3,8 +3,13 @@ import psycopg2
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from hismat import hismat
+from blur import BLUR_RADII, blur_image
 from PIL import Image
 from io import BytesIO
+from blur import blur_image, BLUR_RADII
+import cv2
+import numpy as np
+from contrast import process_grayscale_image
 api = Blueprint("api", __name__)
 
 # =========================================
@@ -242,6 +247,14 @@ def ai_health():
 
     return jsonify(result), 503
 
+def check_blur():
+    try:
+        if callable(blur_image) and isinstance(BLUR_RADII, dict):
+            return "ok"
+        return "error"
+    except Exception:
+        return "error"
+
 # =========================================
 # FEATURE HEALTH CHECK
 # =========================================
@@ -269,6 +282,14 @@ def check_remove_bg():
 
     except Exception:
         return "error"
+
+def check_blur():
+    try:
+        if callable(blur_image) and isinstance(BLUR_RADII, dict):
+            return "ok"
+        return "error"
+    except Exception:
+        return "error"
     
 # =========================================
 # DATABASE HEALTH CHECK
@@ -286,11 +307,13 @@ def db_health():
     return jsonify(result), 503
 
 
-# =========================================
-# READY CHECK
-# BACKEND + AI + DATABASE
-# =========================================
-
+def check_contrast():
+    try:
+        if callable(process_grayscale_image):
+            return "ok"
+        return "error"
+    except Exception:
+        return "error"
 # =========================================
 # READY CHECK
 # BACKEND + AI + DATABASE + FEATURES
@@ -301,18 +324,25 @@ def ready():
 
     backend_status = "ok"
 
+    # ตรวจสอบระบบหลัก
     ai_result = check_ai()
     database_result = check_database()
 
+    # ตรวจสอบฟีเจอร์
     hismat_status = check_hismat()
     remove_bg_status = check_remove_bg()
+    blur_status = check_blur()
+    contrast_status = check_contrast()
 
+    # ตรวจสอบว่าทุกระบบพร้อมหรือไม่
     all_ready = (
         backend_status == "ok"
         and ai_result["status"] == "ok"
         and database_result["status"] == "ok"
         and hismat_status == "ok"
         and remove_bg_status == "ok"
+        and blur_status == "ok"
+        and contrast_status == "ok"
     )
 
     return jsonify({
@@ -321,9 +351,10 @@ def ready():
         "ai": ai_result["status"],
         "database": database_result["status"],
         "hismat": hismat_status,
-        "remove_bg": remove_bg_status
+        "remove_bg": remove_bg_status,
+        "blur": blur_status,
+        "contrast": contrast_status
     }), 200 if all_ready else 503
-
 # =========================================
 # ADMIN - DASHBOARD
 # =========================================
@@ -1652,59 +1683,96 @@ def hismat_route():
             "message": str(e)
         }), 500
 
+
+@api.route("/blur", methods=["POST"])
+def blur_route():
+    if "image" not in request.files:
+        return jsonify({
+            "status": "error",
+            "message": "image is required"
+        }), 400
+
+    strength = request.form.get("strength", "medium")
+    if strength not in BLUR_RADII:
+        return jsonify({
+            "status": "error",
+            "message": "strength must be low, medium, or high"
+        }), 400
+
+    try:
+        source_image = Image.open(request.files["image"]).convert("RGB")
+        result = blur_image(source_image, BLUR_RADII[strength])
+
+        output = BytesIO()
+        result.save(output, format="PNG")
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype="image/png",
+            download_name="blur.png"
+        )
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "message": "cannot process image"
+        }), 415
+
+
+
 @api.route("/remove-background", methods=["POST"])
 def remove_background():
 
-    if "user_id" not in session:
-        return jsonify({"error": "Login required"}), 401
+        if "user_id" not in session:
+            return jsonify({"error": "Login required"}), 401
 
-    if "image" not in request.files:
-        return jsonify({"error": "No image"}), 400
+        if "image" not in request.files:
+            return jsonify({"error": "No image"}), 400
 
-    image = request.files["image"]
+        image = request.files["image"]
 
-    conn = get_db_connection()
-    cur = conn.cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-    cur.execute("""
-        INSERT INTO image_tasks (user_id, task_type, status, prompt_text)
-        VALUES (%s, 'remove_bg', 'processing', %s)
-        RETURNING id
-    """, (session["user_id"], "Background Removal"))
+        cur.execute("""
+            INSERT INTO image_tasks (user_id, task_type, status, prompt_text)
+            VALUES (%s, 'remove_bg', 'processing', %s)
+            RETURNING id
+        """, (session["user_id"], "Background Removal"))
 
-    task_id = cur.fetchone()[0]
-    conn.commit()
-
-    try:
-        response = requests.post(
-            f"{current_app.config['REMBG_URL']}/api/remove",
-            files={"image": (image.filename, image.stream, image.mimetype)},
-            timeout=120
-        )
-
-        response.raise_for_status()
-
-        cur.execute(
-            "UPDATE image_tasks SET status='completed' WHERE id=%s",
-            (task_id,)
-        )
+        task_id = cur.fetchone()[0]
         conn.commit()
 
-        return send_file(
-            BytesIO(response.content),
-            mimetype="image/png",
-            download_name="background_removed.png"
-        )
+        try:
+            response = requests.post(
+                f"{current_app.config['REMBG_URL']}/api/remove",
+                files={"image": (image.filename, image.stream, image.mimetype)},
+                timeout=120
+            )
 
-    except Exception as e:
-        cur.execute(
-            "UPDATE image_tasks SET status='failed' WHERE id=%s",
-            (task_id,)
-        )
-        conn.commit()
+            response.raise_for_status()
 
-        return jsonify({"error": str(e), "task_id": task_id}), 500
+            cur.execute(
+                "UPDATE image_tasks SET status='completed' WHERE id=%s",
+                (task_id,)
+            )
+            conn.commit()
 
-    finally:
-        cur.close()
-        conn.close()
+            return send_file(
+                BytesIO(response.content),
+                mimetype="image/png",
+                download_name="background_removed.png"
+            )
+
+        except Exception as e:
+            cur.execute(
+                "UPDATE image_tasks SET status='failed' WHERE id=%s",
+                (task_id,)
+            )
+            conn.commit()
+
+            return jsonify({"error": str(e), "task_id": task_id}), 500
+
+        finally:
+            cur.close()
+            conn.close()
