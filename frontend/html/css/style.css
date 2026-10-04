@@ -263,3 +263,97 @@ body {
   border-color: #0dcaf0;
   background-color: rgba(13, 202, 240, 0.1);
 }
+
+/* ========================================== */
+/* 📱 ปรับแต่ง UI มือถือให้สวยงามและไม่เบียดกัน */
+/* ========================================== */
+@media (max-width: 768px) {
+  /* 1. จัดระเบียบ Navbar ด้านบนให้อยู่บรรทัดเดียวกัน ไม่ให้โลโก้กับโปรไฟล์ทับกัน */
+  .d-flex, nav, .navbar {
+    flex-wrap: nowrap !important;
+  }
+  
+  /* ย่อขนาดตัวอักษรโลโก้ LUMA บนมือถือ */
+  .navbar-brand {
+    font-size: 1.1rem !important;
+    white-space: nowrap;
+  }
+
+  /* 2. จัดระเบียบปุ่มเลือกฟีเจอร์ 3 ปุ่ม (AI / Color / BG Removal) ให้นอนเรียงกัน หรือเลื่อนปัดซ้ายขวาได้ */
+  /* (ครอบคลุมทั้งแท็ก nav-pills และปุ่มเมนูด้านบน) */
+  .nav, .nav-pills, .btn-group {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    padding-bottom: 6px;
+  }
+
+  /* ปรับขนาดปุ่มเมนูให้กะทัดรัด ไม่ล้นจอ */
+  .nav-link, .btn {
+    font-size: 0.85rem !important;
+    padding: 6px 10px !important;
+    white-space: nowrap;
+  }
+
+  /* 3. ปรับขนาดช่องพิมพ์ Prompt ไม่ให้ล้นขอบจอ และป้องกันมือถือ iOS ซูมจอเอง */
+  textarea.form-control, input.form-control {
+    font-size: 16px !important;
+  }
+}
+
+/* ========================================== */
+/* 🛠️ ปรับแต่งหน้า Admin ให้ใช้งานบนมือถือได้สวยงาม */
+/* ========================================== */
+@media (max-width: 992px) {
+  /* 1. เปลี่ยนกล่องหลักจากแถว (row) เป็นคอลัมน์แนวตั้ง */
+  .d-flex:has(.admin-sidebar) {
+    flex-direction: column !important;
+  }
+
+  /* 2. ย่อ Sidebar ด้านข้างให้กลายเป็นแถบเมนูด้านบนแทน */
+  .admin-sidebar {
+    width: 100% !important;
+    min-height: auto !important;
+    height: auto !important;
+    position: relative !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid #333;
+    padding: 12px !important;
+  }
+
+  /* 3. บังคับให้เมนูใน Sidebar เรียงเป็นแนวนอน เลื่อนปัดซ้ายขวาได้ */
+  .admin-sidebar .nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    padding-bottom: 5px;
+  }
+
+  .admin-sidebar .nav-link {
+    white-space: nowrap;
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* ซ่อนข้อมูลโปรไฟล์ย่อยใน Sidebar ชั่วคราวบนมือถือเพื่อประหยัดพื้นที่ */
+  .admin-sidebar hr, 
+  .admin-sidebar .d-flex.align-items-center.px-2.mb-3 {
+    display: none !important;
+  }
+
+  /* 4. ปรับพื้นที่เนื้อหาหลักให้แสดงเต็มจอ ไม่ล้น */
+  .flex-grow-1 {
+    height: auto !important;
+    padding: 16px !important;
+    overflow: visible !important;
+  }
+
+  /* จัดระเบียบตารางข้อมูลในหน้า Admin ให้เลื่อนปัดซ้ายขวาดูได้ ไม่เบียด */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
