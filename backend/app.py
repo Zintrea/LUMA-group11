@@ -5,7 +5,7 @@ import psycopg2
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-
+from blur import blur_image, BLUR_RADII
 # =========================================
 # LOAD ENV
 # =========================================
