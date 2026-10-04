@@ -732,3 +732,144 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// ==========================================
+// 🔲 ฟีเจอร์ Grayscale Histogram Equalization (ประมวลผลฝั่งหน้าบ้าน 100% ไม่ต้องง้อ Backend)
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  const grayscaleForm = document.getElementById('grayscaleForm');
+  const grayImageInput = document.getElementById('grayImageInput');
+  const btnGraySubmit = document.getElementById('btnGraySubmit');
+  
+  const grayAlert = document.getElementById('grayAlert');
+  const grayEmptyState = document.getElementById('grayEmptyState');
+  const grayLoadingState = document.getElementById('grayLoadingState');
+  const grayResultContainer = document.getElementById('grayResultContainer');
+  const grayResultImage = document.getElementById('grayResultImage');
+  const btnGrayDownload = document.getElementById('btnGrayDownload');
+
+  if (grayscaleForm) {
+    grayscaleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      grayAlert.classList.add('d-none');
+
+      const file = grayImageInput.files[0];
+      if (!file) {
+        grayAlert.textContent = 'กรุณาอัปโหลดรูปภาพก่อนครับ';
+        grayAlert.classList.remove('d-none');
+        return;
+      }
+
+      const originalBtnText = btnGraySubmit.innerHTML;
+      btnGraySubmit.disabled = true;
+      btnGraySubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing Grayscale...';
+
+      grayEmptyState.classList.add('d-none');
+      grayResultContainer.classList.add('d-none');
+      grayLoadingState.classList.remove('d-none');
+
+      try {
+        // ใช้ Canvas แปลงภาพเป็น Grayscale และทำ Histogram Equalization จำลองฝั่งหน้าบ้าน
+        const processedImageUrl = await processGrayscaleOnClient(file);
+        
+        grayResultImage.src = processedImageUrl;
+        grayLoadingState.classList.add('d-none');
+        grayResultContainer.classList.remove('d-none');
+
+      } catch (error) {
+        console.error('Grayscale Error:', error);
+        grayLoadingState.classList.add('d-none');
+        grayEmptyState.classList.remove('d-none');
+        
+        grayAlert.textContent = 'ประมวลผลภาพไม่สำเร็จ: ' + error.message;
+        grayAlert.classList.remove('d-none');
+      } finally {
+        btnGraySubmit.disabled = false;
+        btnGraySubmit.innerHTML = originalBtnText;
+      }
+    });
+  }
+
+  // ฟังก์ชันประมวลผลภาพขาวดำและปรับ Contrast ด้วย JavaScript Canvas
+  function processGrayscaleOnClient(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          
+          // วาดรูปต้นฉบับลง Canvas
+          ctx.drawImage(img, 0, 0);
+          
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imgData.data;
+          
+          let hist = new Array(256).fill(0);
+          let grayValues = new Uint8Array(data.length / 4);
+
+          // 1. แปลงเป็น Grayscale และคำนวณ Histogram
+          for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+            let gray = Math.round(0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2]);
+            grayValues[j] = gray;
+            hist[gray]++;
+          }
+
+          // 2. คำนวณ Cumulative Distribution Function (CDF) สำหรับ Histogram Equalization
+          let cdf = new Array(256).fill(0);
+          cdf[0] = hist[0];
+          for (let i = 1; i < 256; i++) {
+            cdf[i] = cdf[i - 1] + hist[i];
+          }
+
+          let cdfMin = cdf.find(val => val > 0) || 0;
+          let totalPixels = grayValues.length;
+          let lut = new Uint8Array(256);
+
+          for (let i = 0; i < 256; i++) {
+            let val = Math.round(((cdf[i] - cdfMin) / (totalPixels - cdfMin)) * 255);
+            lut[i] = Math.max(0, Math.min(255, val));
+          }
+
+          // 3. แทนที่ค่าพิกเซลด้วย Equalized Gray Value
+          for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+            let eqGray = lut[grayValues[j]];
+            data[i] = eqGray;     // Red
+            data[i+1] = eqGray;   // Green
+            data[i+2] = eqGray;   // Blue
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+          
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error('Canvas conversion failed'));
+              return;
+            }
+            resolve(URL.createObjectURL(blob));
+          }, 'image/png');
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  }
+
+  if (btnGrayDownload) {
+    btnGrayDownload.addEventListener('click', () => {
+      const imgSrc = grayResultImage.src;
+      if (!imgSrc) return;
+      const link = document.createElement('a');
+      link.href = imgSrc;
+      link.download = `LUMA_Grayscale_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+});
