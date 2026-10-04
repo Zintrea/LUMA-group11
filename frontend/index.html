@@ -58,25 +58,6 @@
         
         <h6 class="text-uppercase text-muted fw-bold mb-3 small">3. Action</h6>
         <button id="btnGenerate" class="btn btn-primary w-100 fw-bold py-2"><i class="bi bi-magic me-1"></i> Generate Image</button>
-
-        <hr class="border-secondary">
-
-        <h6 class="text-uppercase text-muted fw-bold mb-3 small">4. Basic Image Blur</h6>
-        <form id="blurForm">
-          <div class="mb-3">
-            <label for="blurImage" class="form-label small text-light">Upload Image</label>
-            <input type="file" class="form-control bg-dark text-light border-secondary" id="blurImage" accept="image/*" required>
-          </div>
-          <div class="mb-3">
-            <label for="blurStrength" class="form-label small text-muted">Blur Strength</label>
-            <select class="form-select bg-dark text-light border-secondary" id="blurStrength" name="blurStrength">
-              <option value="low">Low</option>
-              <option value="medium" selected>Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-          <button id="btnBlur" type="submit" class="btn btn-secondary w-100 fw-bold py-2"><i class="bi bi-droplet-half me-1"></i> Blur Image</button>
-        </form>
       </div>
 
       <div class="col-md-8 col-lg-9 workspace">
@@ -88,15 +69,6 @@
             <div class="text-muted small">This may take 10-30 seconds.</div>
           </div>
           <img id="resultImage" class="d-none" src="" alt="Generated AI Image">
-
-          <div id="blurResultContainer" class="d-none text-center mt-4">
-            <div id="blurLoadingState" class="d-none text-center mb-3">
-              <div class="spinner-border text-secondary mb-2" role="status"></div>
-              <div class="text-light fw-bold">Blurring image...</div>
-            </div>
-            <img id="blurResultImage" class="d-none" src="" alt="Blurred Image">
-            <button id="btnBlurDownload" class="btn btn-success mt-3 d-none"><i class="bi bi-download me-1"></i> Save Blurred Image</button>
-          </div>
         </div>
       </div>
       
