@@ -66,6 +66,11 @@
           <i class="bi bi-palette-fill me-2"></i> Color Matching 
         </button>
       </li>
+      <li class="nav-item ms-2" role="presentation">
+        <button class="nav-link fw-bold px-4 rounded-pill" id="tab-blur" data-bs-toggle="pill" data-bs-target="#pane-blur" type="button" role="tab">
+          <i class="bi bi-droplet-half me-2"></i> Blur Image
+        </button>
+      </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link fw-bold px-4 rounded-pill" id="tab-removebg" data-bs-toggle="pill" data-bs-target="#pane-removebg" type="button" role="tab">
           <i class="bi bi-eraser-fill me-2"></i> Background Removal
@@ -207,8 +212,54 @@
       </div>
     </div>
 
+    <!-- 🌫️ 3. แท็บ BASIC IMAGE BLUR -->
+    <div class="tab-pane fade" id="pane-blur" role="tabpanel">
+      <div class="row g-0">
+        <div class="col-md-4 col-lg-3 sidebar p-4 border-end border-secondary" style="min-height: calc(100vh - 120px);">
+          <h6 class="text-uppercase text-muted fw-bold mb-3 small">Basic Image Blur</h6>
+          <p class="small text-muted mb-4">เบลอภาพทั้งภาพด้วย Gaussian Blur</p>
+
+          <form id="blurForm">
+            <div class="mb-4">
+              <label class="form-label small text-light fw-bold">1. Upload Image</label>
+              <input type="file" class="form-control bg-dark text-light border-secondary shadow-sm" id="blurImage" accept="image/*" required>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small text-light fw-bold">2. Blur Strength</label>
+              <select class="form-select bg-dark text-light border-secondary" id="blurStrength" name="blurStrength">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-secondary text-white w-100 fw-bold py-2 shadow" id="btnBlur">
+              <i class="bi bi-droplet-half me-1"></i> Blur Image
+            </button>
+          </form>
+        </div>
+
+        <div class="col-md-8 col-lg-9 workspace d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="min-height: calc(100vh - 120px);">
+          <div class="text-center p-4">
+            <span id="blurEmptyState" class="text-muted d-block p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-50">
+              <i class="bi bi-image display-4 d-block mb-3 text-secondary"></i> Blurred image will appear here
+            </span>
+            <div id="blurLoadingState" class="d-none text-center p-5">
+              <div class="spinner-border text-secondary mb-3" style="width: 4rem; height: 4rem;"></div>
+              <h5 class="text-light fw-bold">Blurring image...</h5>
+            </div>
+            <img id="blurResultImage" class="d-none img-fluid shadow-lg rounded" src="" style="max-height: 70vh; object-fit: contain;">
+            <div class="text-center mt-4">
+              <button id="btnBlurDownload" class="btn btn-success fw-bold px-4 py-2 d-none"><i class="bi bi-download me-2"></i> Save Result</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
-  <!-- 🎨 3. แท็บ BACKGROUND REMOVAL -->
+  <!-- 🎨 4. แท็บ BACKGROUND REMOVAL -->
     <div class="tab-pane fade" id="pane-removebg" role="tabpanel">
       <div class="row g-0">
         
