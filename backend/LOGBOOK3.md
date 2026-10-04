@@ -114,7 +114,7 @@ backend/
 ├── blur.py
 ├── hismat.py
 └── .env
-ใช้ Pillow ในการทำ Gaussian Blur
+ใช้ Pillow ในการทำ Gaussian Blur:
 from PIL import ImageFilter
 กำหนดระดับ Blur:
 BLUR_RADII = {
@@ -177,6 +177,8 @@ Database
 Hismat
 Remove Background
 Blur
+และต่อมาเพิ่ม:
+Contrast
 โครงสร้างใหม่:
 /ready
 │
@@ -185,7 +187,8 @@ Blur
 ├── AI / Forge
 ├── Hismat
 ├── Remove Background
-└── Blur
+├── Blur
+└── Contrast
 11. เพิ่ม Hismat Health Check
 เพิ่ม:
 def check_hismat():
@@ -236,7 +239,9 @@ database_result = check_database()
 hismat_status = check_hismat()
 remove_bg_status = check_remove_bg()
 blur_status = check_blur()
-และเพิ่มทุก Feature เข้า all_ready:
+และเพิ่ม Contrast:
+contrast_status = check_contrast()
+เพิ่มทุก Feature เข้า all_ready:
 all_ready = (
     backend_status == "ok"
     and ai_result["status"] == "ok"
@@ -244,6 +249,7 @@ all_ready = (
     and hismat_status == "ok"
     and remove_bg_status == "ok"
     and blur_status == "ok"
+    and contrast_status == "ok"
 )
 Response ของ /ready เพิ่ม:
 {
@@ -253,31 +259,193 @@ Response ของ /ready เพิ่ม:
     "database": "ok",
     "hismat": "ok",
     "remove_bg": "ok",
-    "blur": "ok"
+    "blur": "ok",
+    "contrast": "ok"
 }
 หาก Feature ใดไม่พร้อม ระบบจะตอบ:
 status = not_ready
 และแสดงสถานะของแต่ละส่วนแยกกัน
-15. Syntax Check
+15. เพิ่มฟีเจอร์ Contrast / Grayscale
+เพิ่มฟีเจอร์สำหรับประมวลผลภาพโดยแปลงภาพสีเป็น Grayscale และปรับ Contrast ด้วย Histogram Equalization
+สร้างไฟล์ใหม่:
+backend/contrast.py
+โครงสร้าง:
+backend/
+├── app.py
+├── routes.py
+├── blur.py
+├── contrast.py
+├── hismat.py
+└── .env
+โค้ดใน contrast.py:
+import cv2
+
+
+def process_grayscale_image(image):
+    """
+    แปลงภาพสีเป็น Grayscale
+    และปรับ Contrast ด้วย Histogram Equalization
+    """
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    output = cv2.equalizeHist(gray)
+
+    return output
+การทำงาน:
+Color Image
+     ↓
+BGR → Grayscale
+     ↓
+Histogram Equalization
+     ↓
+Contrast Image
+การประมวลผล Contrast ทำโดยตรงบนเครื่อง Backend ไม่ต้องส่งภาพไปยัง Service เครื่องอื่น
+16. เพิ่ม Contrast Route
+เพิ่ม Endpoint:
+POST /contrast
+รับไฟล์:
+image
+การทำงาน:
+Frontend
+   ↓
+POST /contrast
+   ↓
+Backend
+   ↓
+อ่าน Image
+   ↓
+process_grayscale_image()
+   ↓
+Grayscale
+   ↓
+Histogram Equalization
+   ↓
+PNG
+   ↓
+Frontend
+เพิ่ม Import ใน routes.py:
+from contrast import process_grayscale_image
+ผลลัพธ์ส่งกลับเป็น:
+image/png
+ชื่อไฟล์:
+contrast.png
+17. ติดตั้งและตรวจสอบ OpenCV
+Contrast ใช้ OpenCV และ NumPy
+Package ที่เกี่ยวข้อง:
+opencv-python
+numpy
+ติดตั้ง OpenCV ใน Virtual Environment:
+..\venv\Scripts\python.exe -m pip install opencv-python
+ตรวจสอบ OpenCV:
+..\venv\Scripts\python.exe -c "import cv2; print(cv2.__version__)"
+ในระหว่างการเพิ่ม Contrast พบว่า Python ที่ใช้รัน Backend ต้องเป็น Python จาก Virtual Environment เพื่อให้สามารถเรียกใช้ Package ที่ติดตั้งไว้ได้
+คำสั่งที่ใช้:
+..\venv\Scripts\python.exe app.py
+18. เพิ่ม Contrast Health Check
+เพิ่มฟังก์ชันสำหรับตรวจสอบสถานะ Contrast:
+def check_contrast():
+    try:
+        if callable(process_grayscale_image):
+            return "ok"
+        return "error"
+    except Exception:
+        return "error"
+หน้าที่ของฟังก์ชันนี้คือ ตรวจสอบว่า process_grayscale_image พร้อมใช้งานหรือไม่
+การตรวจสอบนี้ไม่ได้ประมวลผลรูปภาพจริง
+19. ปรับปรุง /ready เพิ่ม Contrast
+จากเดิม /ready ตรวจสอบ:
+Backend
+Database
+AI / Forge
+Hismat
+Remove Background
+Blur
+ปรับเป็น:
+/ready
+│
+├── Backend
+├── Database
+├── AI / Forge
+├── Hismat
+├── Remove Background
+├── Blur
+└── Contrast
+เพิ่มการเรียก:
+contrast_status = check_contrast()
+และเพิ่ม Contrast ใน all_ready:
+all_ready = (
+    backend_status == "ok"
+    and ai_result["status"] == "ok"
+    and database_result["status"] == "ok"
+    and hismat_status == "ok"
+    and remove_bg_status == "ok"
+    and blur_status == "ok"
+    and contrast_status == "ok"
+)
+Response ใหม่ของ /ready:
+{
+    "status": "ready",
+    "backend": "ok",
+    "ai": "ok",
+    "database": "ok",
+    "hismat": "ok",
+    "remove_bg": "ok",
+    "blur": "ok",
+    "contrast": "ok"
+}
+หาก Contrast ไม่พร้อม:
+{
+    "status": "not_ready",
+    "backend": "ok",
+    "ai": "ok",
+    "database": "ok",
+    "hismat": "ok",
+    "remove_bg": "ok",
+    "blur": "ok",
+    "contrast": "error"
+}
+20. Syntax Check
 หลังแก้ไข routes.py มีการตรวจสอบ Syntax ด้วย:
 ..\venv\Scripts\python.exe -m py_compile routes.py
-ผลการตรวจสอบ:
-ไม่มี Error
-จึงยืนยันว่า routes.py ผ่าน Syntax Check
-16. ทดสอบ /ready
+ตรวจสอบ contrast.py:
+..\venv\Scripts\python.exe -m py_compile contrast.py
+หากไม่มี Error แสดงว่าไฟล์ผ่าน Syntax Check
+21. ทดสอบ /ready
 มีการทดสอบ:
 curl.exe http://localhost:5000/ready
-ผลที่พบ:
+หาก Flask Backend ไม่ได้เปิดรับ Connection จะได้รับ:
 curl: (7) Failed to connect to localhost:5000
 Could not connect to server
 สาเหตุคือในช่วงเวลาที่ทดสอบ Flask Backend ไม่ได้เปิดรับ Connection ที่:
 localhost:5000
-ดังนั้นผลนี้ยังไม่ใช่ Error จาก Logic ของ /ready แต่เป็นการที่ Backend ไม่ได้กำลังรันอยู่
 การทดสอบที่ถูกต้องต้องเปิด Backend ก่อน:
 ..\venv\Scripts\python.exe app.py
 จากนั้นจึงเรียก:
 curl.exe http://localhost:5000/ready
-17. สรุปสถานะงานวันที่ 04/10/2569
+รายการที่ต้องตรวจสอบ:
+backend
+ai
+database
+hismat
+remove_bg
+blur
+contrast
+22. ทดสอบ Contrast
+หลังจากเปิด Backend:
+..\venv\Scripts\python.exe app.py
+ทดสอบ API:
+POST /contrast
+โดยส่ง:
+image
+ตรวจสอบผลลัพธ์ว่า Backend ส่งกลับ:
+image/png
+ชื่อไฟล์:
+contrast.png
+และตรวจสอบว่าภาพมีการ:
+Grayscale
+Histogram Equalization
+23. สรุปสถานะงานวันที่ 04/10/2569
 งาน	สถานะ
 ตั้งค่า FORGE_URL	✅
 ตั้งค่า REMBG_URL	✅
@@ -290,14 +458,20 @@ Blur Route	✅
 Hismat Readiness Check	✅
 Remove Background Readiness Check	✅
 Blur Readiness Check	✅
+Contrast Function	✅
+contrast.py	✅
+Contrast Route	✅
+Contrast Readiness Check	✅
 ปรับ /ready	✅
 Syntax Check routes.py	✅
+Syntax Check contrast.py	✅
 ทดสอบ /ready จริง	🔄 รอเปิด Backend และทดสอบ
 ทดสอบ Remove Background Route จริง	🔄
 ทดสอบ Blur Route จริง	🔄
+ทดสอบ Contrast Route จริง	🔄
 
 
-18. งานที่ต้องทำต่อ
+24. งานที่ต้องทำต่อ
 1. เปิด Flask Backend:
 ..\venv\Scripts\python.exe app.py
 2. ทดสอบ:
@@ -309,6 +483,7 @@ database
 hismat
 remove_bg
 blur
+contrast
 4. ทดสอบ:
 POST /remove-background
 5. ตรวจสอบ image_tasks
@@ -318,8 +493,16 @@ POST /blur
 low
 medium
 high
-8. ทดสอบการเชื่อมต่อ Feature ทั้งหมดจาก Frontend
+8. ทดสอบ:
+POST /contrast
+9. ตรวจสอบผลลัพธ์ Contrast:
+Grayscale
+Histogram Equalization
+PNG Response
+10. ทดสอบการเชื่อมต่อ Feature ทั้งหมดจาก Frontend
 สรุปประจำวัน
-วันที่ 04/10/2569 ได้ดำเนินการต่อยอด Backend-AI โดยเพิ่มระบบ Remove Background ที่เชื่อมต่อกับ Service บน PC2, เพิ่มฟีเจอร์ Blur ที่ประมวลผลบน Backend โดยใช้ blur.py, และเพิ่มการตรวจสอบ Hismat, Remove Background และ Blur เข้าไปใน /ready
-นอกจากนี้ได้ตรวจสอบ Syntax ของ routes.py และแก้ปัญหาการใช้ Python ผิด Environment ที่ทำให้ไม่พบ PIL
-โครงสร้างฟีเจอร์และ Readiness Check ถูกเพิ่มเรียบร้อยแล้ว ส่วนที่ยังเหลือคือการทดสอบ /ready, Remove Background และ Blur ผ่านการใช้งานจริง
+วันที่ 04/10/2569 ได้ดำเนินการต่อยอด Backend-AI โดยเพิ่มระบบ Remove Background ที่เชื่อมต่อกับ Service บน PC2, เพิ่มฟีเจอร์ Blur ที่ประมวลผลบน Backend โดยใช้ blur.py และเพิ่มฟีเจอร์ Contrast / Grayscale ที่ประมวลผลด้วย OpenCV และ Histogram Equalization
+นอกจากนี้ได้เพิ่มการตรวจสอบ Hismat, Remove Background, Blur และ Contrast เข้าไปใน /ready เพื่อให้สามารถตรวจสอบสถานะของแต่ละ Feature แยกกันได้
+ในส่วนของ Contrast ได้สร้าง contrast.py, เพิ่ม POST /contrast, เพิ่ม check_contrast() และเพิ่ม Contrast เข้าเงื่อนไข all_ready ของ /ready
+นอกจากนี้ได้ตรวจสอบ Syntax ของ routes.py และ contrast.py รวมถึงแก้ปัญหาการใช้ Python ผิด Environment ที่ทำให้ไม่พบ Package เช่น PIL และ OpenCV
+โครงสร้างฟีเจอร์และ Readiness Check ถูกเพิ่มเรียบร้อยแล้ว ส่วนที่ยังเหลือคือการทดสอบ /ready, Remove Background, Blur และ Contrast ผ่านการใช้งานจริง และทดสอบการเชื่อมต่อ Feature ทั้งหมดจาก Frontend

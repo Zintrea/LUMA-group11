@@ -7,6 +7,9 @@ from blur import BLUR_RADII, blur_image
 from PIL import Image
 from io import BytesIO
 from blur import blur_image, BLUR_RADII
+import cv2
+import numpy as np
+from contrast import process_grayscale_image
 api = Blueprint("api", __name__)
 
 # =========================================
@@ -304,11 +307,13 @@ def db_health():
     return jsonify(result), 503
 
 
-# =========================================
-# READY CHECK
-# BACKEND + AI + DATABASE
-# =========================================
-
+def check_contrast():
+    try:
+        if callable(process_grayscale_image):
+            return "ok"
+        return "error"
+    except Exception:
+        return "error"
 # =========================================
 # READY CHECK
 # BACKEND + AI + DATABASE + FEATURES
@@ -319,13 +324,17 @@ def ready():
 
     backend_status = "ok"
 
+    # ตรวจสอบระบบหลัก
     ai_result = check_ai()
     database_result = check_database()
 
+    # ตรวจสอบฟีเจอร์
     hismat_status = check_hismat()
     remove_bg_status = check_remove_bg()
     blur_status = check_blur()
+    contrast_status = check_contrast()
 
+    # ตรวจสอบว่าทุกระบบพร้อมหรือไม่
     all_ready = (
         backend_status == "ok"
         and ai_result["status"] == "ok"
@@ -333,6 +342,7 @@ def ready():
         and hismat_status == "ok"
         and remove_bg_status == "ok"
         and blur_status == "ok"
+        and contrast_status == "ok"
     )
 
     return jsonify({
@@ -342,9 +352,9 @@ def ready():
         "database": database_result["status"],
         "hismat": hismat_status,
         "remove_bg": remove_bg_status,
-        "blur": blur_status
+        "blur": blur_status,
+        "contrast": contrast_status
     }), 200 if all_ready else 503
-
 # =========================================
 # ADMIN - DASHBOARD
 # =========================================
@@ -1708,9 +1718,11 @@ def blur_route():
             "message": "cannot process image"
         }), 415
 
+    
 
-    @api.route("/remove-background", methods=["POST"])
-    def remove_background():
+
+@api.route("/remove-background", methods=["POST"])
+def remove_background():
 
         if "user_id" not in session:
             return jsonify({"error": "Login required"}), 401
