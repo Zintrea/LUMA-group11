@@ -82,7 +82,7 @@
   <!-- ================= พื้นที่ทำงาน (Tab Content) ================= -->
   <div class="tab-content container-fluid p-0" id="workspaceTabsContent">
     
-    <!-- 🎯 1. แท็บ GENERATE IMAGE (โค้ดเดิม) -->
+    <!-- 🎯 1. แท็บ GENERATE IMAGE -->
     <div class="tab-pane fade show active" id="pane-generate" role="tabpanel">
       <div class="row g-0">
         <!-- Sidebar -->
@@ -125,7 +125,7 @@
       </div>
     </div>
 
-    <!-- 🎨 2. แท็บ COLOR MATCHING (รองรับทั้ง Preset และ Custom Upload) -->
+    <!-- 🎨 2. แท็บ COLOR MATCHING -->
     <div class="tab-pane fade" id="pane-hismat" role="tabpanel">
       <div class="row g-0">
         <!-- Sidebar -->
@@ -136,7 +136,7 @@
           <form id="hismatForm">
             <!-- 1. Source Image -->
             <div class="mb-4">
-              <label class="form-label small text-light fw-bold">1. Source Image (รูปต้นฉบับ)</label>
+              <label class="form-label small text-light fw-bold">Source Image (รูปต้นฉบับ)</label>
               <input type="file" class="form-control bg-dark text-light border-secondary shadow-sm" id="sourceImage" accept="image/*" required>
             </div>
 
@@ -154,7 +154,7 @@
                 </div>
               </div>
 
-              <!-- โหมดที่ A: ปุ่มเลือกโทนสีสำเร็จรูป (แสดงเป็นค่าเริ่มต้น) -->
+              <!-- โหมดที่ A: ปุ่มเลือกโทนสีสำเร็จรูป -->
               <div id="presetToneContainer">
                 <div class="row g-2">
                   <div class="col-4">
@@ -178,7 +178,7 @@
                 </div>
               </div>
 
-              <!-- โหมดที่ B: ช่องอัปโหลดรูปภาพอ้างอิงเอง (ซ่อนไว้ก่อนจนกว่าจะกดเลือก) -->
+              <!-- โหมดที่ B: ช่องอัปโหลดรูปภาพอ้างอิงเอง -->
               <div id="customFileContainer" class="d-none">
                 <input type="file" class="form-control bg-dark text-light border-info shadow-sm" id="referenceImage" accept="image/*">
                 <div class="form-text text-muted small mt-1">อัปโหลดรูปภาพเพื่อดึงโทนสีมาใช้เทียบเคียง</div>
@@ -212,16 +212,16 @@
       </div>
     </div>
 
-    <!-- 🌫️ 3. แท็บ BASIC IMAGE BLUR -->
+    <!-- 🌫️ 3. แท็บ BASIC IMAGE BLUR (ปรับปุ่มเป็นสีน้ำเงิน btn-primary แล้ว) -->
     <div class="tab-pane fade" id="pane-blur" role="tabpanel">
       <div class="row g-0">
         <div class="col-md-4 col-lg-3 sidebar p-4 border-end border-secondary" style="min-height: calc(100vh - 120px);">
           <h6 class="text-uppercase text-muted fw-bold mb-3 small">Basic Image Blur</h6>
-          <p class="small text-muted mb-4">เบลอภาพทั้งภาพด้วย Gaussian Blur</p>
+          <p class="small text-muted mb-4">เบลอภาพ</p>
 
           <form id="blurForm">
             <div class="mb-4">
-              <label class="form-label small text-light fw-bold">1. Upload Image</label>
+              <label class="form-label small text-light fw-bold">Upload Image</label>
               <input type="file" class="form-control bg-dark text-light border-secondary shadow-sm" id="blurImage" accept="image/*" required>
             </div>
 
@@ -234,7 +234,8 @@
               </select>
             </div>
 
-            <button type="submit" class="btn btn-secondary text-white w-100 fw-bold py-2 shadow" id="btnBlur">
+            <!-- เปลี่ยนปุ่ม Blur Image เป็นสีน้ำเงิน btn-primary -->
+            <button type="submit" class="btn btn-primary text-white w-100 fw-bold py-2 shadow" id="btnBlur">
               <i class="bi bi-droplet-half me-1"></i> Blur Image
             </button>
           </form>
@@ -246,20 +247,20 @@
               <i class="bi bi-image display-4 d-block mb-3 text-secondary"></i> Blurred image will appear here
             </span>
             <div id="blurLoadingState" class="d-none text-center p-5">
-              <div class="spinner-border text-secondary mb-3" style="width: 4rem; height: 4rem;"></div>
+              <div class="spinner-border text-primary mb-3" style="width: 4rem; height: 4rem;"></div>
               <h5 class="text-light fw-bold">Blurring image...</h5>
             </div>
             <img id="blurResultImage" class="d-none img-fluid shadow-lg rounded" src="" style="max-height: 70vh; object-fit: contain;">
             <div class="text-center mt-4">
-              <button id="btnBlurDownload" class="btn btn-success fw-bold px-4 py-2 d-none"><i class="bi bi-download me-2"></i> Save Result</button>
+              <!-- เปลี่ยนปุ่ม Save Result เป็นสีน้ำเงิน btn-primary -->
+              <button id="btnBlurDownload" class="btn btn-primary fw-bold px-4 py-2 d-none"><i class="bi bi-download me-2"></i> Save Result</button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-  </div>
-  <!-- 🎨 4. แท็บ BACKGROUND REMOVAL -->
+    <!-- 🎨 4. แท็บ BACKGROUND REMOVAL -->
     <div class="tab-pane fade" id="pane-removebg" role="tabpanel">
       <div class="row g-0">
         
@@ -314,7 +315,7 @@
               <p class="text-muted small">AI กำลังประมวลผล อาจใช้เวลาสักครู่...</p>
             </div>
             
-            <!-- รูปผลลัพธ์ (คลาส bg-checkerboard จะทำให้เห็นตารางหมากรุก) -->
+            <!-- รูปผลลัพธ์ -->
             <div id="bgResultContainer" class="d-none">
               <img id="bgResultImage" class="img-fluid shadow-lg rounded bg-checkerboard mx-auto d-block" src="" style="max-height: 60vh; object-fit: contain;">
               <div class="mt-4">
@@ -329,11 +330,11 @@
 
       </div>
     </div>
+
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- อย่าลืมเปลี่ยนเลขเวอร์ชัน หรือกดเคลียร์แคช เพื่อให้เบราว์เซอร์ดึงไฟล์ใหม่ -->
-  <script src="/js/script.js?v=20"></script>
+  <script src="/js/script.js?v=21"></script>
   <script src="/js/theme.js"></script>
-  
 </body>
 </html>
