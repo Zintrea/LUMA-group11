@@ -633,3 +633,34 @@ FORGE_URL = "http://192.168.1.20:7860"
 ```
 
 ให้เปลี่ยนเป็น IP เครื่อง AI ของคุณจริง และถ้าจะให้ดีใน README ให้เขียน IP เป็นตัวอย่างแบบ `<AI-PC-IP>` แต่ในบันทึกทดสอบ DevOps ค่อยจด IP จริงที่ใช้ตอนสอบงาน.
+
+---
+
+# Background Removal — rembg CPU Service
+
+PC2 มีบริการลบพื้นหลังแยกจาก Forge และใช้ CPU เพื่อไม่แย่ง VRAM กับ Stable Diffusion WebUI Forge
+
+```text
+PC3 Backend
+  ↓ POST multipart/form-data (field: image)
+PC2 rembg — http://<PC2-IP>:7000/api/remove
+  ↓ image/png binary
+PC3 Backend
+```
+
+Phone และ Frontend ห้ามเรียก PC2 โดยตรง ต้องผ่าน PC3 Backend เสมอ
+
+## Quick start บน PC2
+
+```text
+1. ai/rembg/setup-rembg-cpu.bat   — รันครั้งแรกหลัง pull
+2. ai/rembg/start-rembg-cpu.bat   — เปิด service
+3. ai/rembg/verify-rembg.bat      — ทดสอบ POST จริง
+4. ai/rembg/stop-rembg-cpu.bat    — ปิด service
+```
+
+รายละเอียดการติดตั้ง, Firewall, runtime logs และ troubleshooting อยู่ที่:
+
+```text
+ai/REMBG-LOGBOOK.md
+```

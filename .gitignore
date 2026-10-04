@@ -17,3 +17,10 @@ node_modules/
 *.pth
 
 forge_test.png
+
+# LUMA PC2 rembg local runtime
+ai/rembg/.venv/
+ai/rembg/models/
+ai/rembg/logs/
+ai/rembg/output/
+ai/rembg/rembg.pid
