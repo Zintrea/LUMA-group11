@@ -1,48 +1,85 @@
 <!doctype html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LUMA - AI Image Generator</title>
-  <meta name="description" content="LUMA turns text prompts into images and gives you image processing tools: background removal, histogram matching, blur and grayscale contrast.">
+  <title>LUMA Group11 - AI Image Studio</title>
+  <meta name="description" content="LUMA Group11: an AI image studio with text-to-image, background removal, histogram matching, blur and contrast tools.">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;650;700&family=Gochi+Hand&family=Instrument+Serif:ital@1&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Mali:wght@400;500&family=Patrick+Hand&family=Sriracha&display=swap" rel="stylesheet">
 
-  <!-- หน้าแรกใช้ stylesheet ของตัวเอง (ไม่โหลด style.css เพื่อไม่ให้กฎ light-mode ของหน้าอื่นทับดีไซน์) -->
-  <link rel="stylesheet" href="/css/home.css?v=1">
+  <!-- หน้าแรกใช้ stylesheet ของตัวเอง (ไม่โหลด style.css เพื่อไม่ให้กฎของหน้าอื่นทับดีไซน์) -->
+  <link rel="stylesheet" href="/css/home.css?v=2">
   <script>
-    // ดึงค่าธีมจาก LocalStorage มาใช้ทันที (แชร์กันทุกหน้า)
-    const savedTheme = localStorage.getItem('luma_theme') || 'dark';
+    // ธีม: ใช้ค่าที่ผู้ใช้เลือกไว้ (แชร์ทุกหน้า) ถ้ายังไม่เคยเลือก หน้าแรกเริ่มเป็นโหมดกระดาษ (light)
+    const savedTheme = localStorage.getItem('luma_theme') || 'light';
     document.documentElement.setAttribute('data-bs-theme', savedTheme);
+
+    // ภาษา: ค่าที่เลือกไว้ หรือภาษาของเบราว์เซอร์
+    const savedLang = localStorage.getItem('luma_lang') ||
+      ((navigator.language || '').toLowerCase().startsWith('th') ? 'th' : 'en');
+    document.documentElement.setAttribute('lang', savedLang);
   </script>
 </head>
 
-<body class="lh">
+<body class="sk">
+
+  <!-- ================= Doodle sprite (วาดเอง ใช้ซ้ำทั้งหน้า) ================= -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="d-sparkle" viewBox="0 0 40 40">
+      <path d="M20 2 C22 14 26 18 38 20 C26 22 22 26 20 38 C18 26 14 22 2 20 C14 18 18 14 20 2 Z" fill="currentColor" stroke="#1b1b1b" stroke-width="2.5" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="d-cloud" viewBox="0 0 160 100">
+      <path d="M22 86 C6 84 6 60 24 56 C20 38 40 28 56 36 C62 16 90 8 106 22 C120 10 146 18 146 40 C160 44 158 70 144 74 C142 86 130 90 120 86 Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="d-curve" viewBox="0 0 50 40">
+      <path d="M44 36 C40 18 28 8 8 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      <path d="M16 1 L7 6 L15 13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="d-right" viewBox="0 0 60 34">
+      <path d="M4 18 C20 12 36 22 52 16" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M42 7 L54 16 L43 26" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="d-down" viewBox="0 0 26 46">
+      <path d="M13 3 C11 16 15 26 13 38" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M5 30 L13 41 L21 30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="d-ticks" viewBox="0 0 46 50">
+      <path d="M6 10 L16 18 M8 26 L22 26 M6 42 L16 34" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="d-bang" viewBox="0 0 80 90">
+      <path d="M14 40 L30 6 L40 10 L24 44 Z M36 58 L66 36 L72 44 L42 66 Z M30 76 L74 74 L74 84 L30 86 Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
 
   <!-- ================= Navbar ================= -->
-  <nav class="lh-nav" aria-label="Main">
-    <div class="lh-wrap lh-nav__inner">
-      <a class="lh-brand" href="/">
-        <i class="bi bi-stars"></i> LUMA <small>GROUP 11</small>
+  <nav class="sk-nav" aria-label="Main">
+    <div class="sk-wrap sk-nav__inner">
+      <a class="sk-brand" href="/">
+        <svg class="sk-sparkle"><use href="#d-sparkle"/></svg> LUMA Group11
       </a>
 
-      <ul class="lh-nav__links lh-mono">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#workflow">Workflow</a></li>
-        <li><a href="#team">Team</a></li>
+      <ul class="sk-nav__links">
+        <li><a href="#features" data-i18n="nav.features">Features</a></li>
+        <li><a href="#how" data-i18n="nav.how">How it works</a></li>
+        <li><a href="#team" data-i18n="nav.team">Team</a></li>
       </ul>
 
-      <div class="lh-nav__actions">
-        <a href="/auth/login" class="lh-btn" id="navLoginBtn">Sign In</a>
-        <a href="/auth/login" class="lh-btn lh-btn--solid" id="navStartBtn">Get Started</a>
+      <div class="sk-nav__actions">
+        <a href="/auth/login" class="sk-btn" id="navLoginBtn" data-i18n="nav.signin">Sign In</a>
+        <a href="/auth/login" class="sk-btn sk-btn--primary" id="navStartBtn" data-i18n="nav.start">Get Started</a>
+
+        <button id="langToggleBtn" class="sk-lang" type="button" aria-label="Switch language / เปลี่ยนภาษา">
+          <span data-lang="th">TH</span><span data-lang="en">EN</span>
+        </button>
 
         <!-- ปุ่มเปลี่ยนธีม (id เดิม ใช้ร่วมกับ theme.js) -->
-        <button id="themeToggleBtn" class="btn btn-outline-secondary lh-icon-btn" type="button" aria-label="Toggle theme">
+        <button id="themeToggleBtn" class="btn btn-outline-secondary sk-icon-btn" type="button" aria-label="Toggle theme">
           <i id="themeIcon" class="bi bi-sun-fill"></i>
         </button>
       </div>
@@ -52,241 +89,307 @@
   <main>
 
     <!-- ================= Hero ================= -->
-    <header class="lh-hero" id="top">
-      <div class="lh-hero__glow" aria-hidden="true"></div>
-      <div class="lh-wrap lh-hero__grid">
+    <header class="sk-hero">
+      <div class="sk-dots sk-dots--tl" aria-hidden="true"></div>
+      <svg class="sk-doodle sk-cloud" aria-hidden="true"><use href="#d-cloud"/></svg>
+      <svg class="sk-sparkle sk-spark-1" aria-hidden="true"><use href="#d-sparkle"/></svg>
+      <svg class="sk-sparkle sk-spark-2" aria-hidden="true"><use href="#d-sparkle"/></svg>
 
-        <div class="lh-reveal">
-          <div class="lh-eyebrow lh-mono">
-            <span class="lh-dot-live"></span> AI image studio · Group 11
-          </div>
-
-          <h1 class="lh-hero__title">
-            Bring your imagination to <em>life.</em>
+      <div class="sk-wrap sk-hero__grid">
+        <div>
+          <h1 class="sk-hero__title">
+            <span class="sk-luma sk-hl sk-hl--yellow">LUMA</span><span class="sk-group">Group11</span>
           </h1>
 
-          <p class="lh-hero__lead">
-            Describe a scene and LUMA renders it in seconds. Then refine it with real image processing tools:
-            remove backgrounds, match colors, blur and boost contrast, all in one workspace.
+          <p class="sk-hero__tagline" data-i18n="hero.tagline">Type it. Generate it. Fix it.</p>
+
+          <p class="sk-hero__lead" data-i18n="hero.lead">
+            An AI image studio built by four students for our Image Processing course.
+            Turn a sentence into a picture, then clean it up with the image processing we coded ourselves.
           </p>
 
-          <div class="lh-hero__ctas">
-            <a href="/auth/login" class="lh-btn lh-btn--solid lh-btn--lg" id="heroCtaBtn">
-              <i class="bi bi-magic"></i> Start Generating for Free
+          <div class="sk-hero__ctas">
+            <a href="/auth/login" class="sk-btn sk-btn--primary sk-btn--lg" id="heroCtaBtn">
+              <i class="bi bi-magic"></i> <span data-i18n="hero.cta">Start creating</span>
             </a>
-            <a href="#features" class="lh-btn lh-btn--lg">Explore features</a>
-          </div>
+            <a href="#how" class="sk-btn sk-btn--lg" data-i18n="hero.how">See how it works</a>
 
-          <div class="lh-hero__meta lh-mono">
-            <span><i class="bi bi-lightning-charge-fill"></i>Fast processing</span>
-            <span><i class="bi bi-aspect-ratio"></i>High resolution</span>
-            <span><i class="bi bi-credit-card-2-front"></i>No credit card</span>
+            <div class="sk-tryme" aria-hidden="true">
+              <svg><use href="#d-curve"/></svg>
+              <span data-i18n="hero.tryme">try it here!</span>
+            </div>
           </div>
         </div>
 
-        <figure class="lh-frame lh-reveal" style="margin:0">
-          <span class="lh-frame__corner lh-frame__corner--tl" aria-hidden="true"></span>
-          <span class="lh-frame__corner lh-frame__corner--br" aria-hidden="true"></span>
-          <figcaption class="lh-frame__bar lh-mono">
-            <span>Render / 001</span><span>512 × 640</span>
-          </figcaption>
-          <img class="lh-frame__img" src="/img/stock/hero.webp" alt="Abstract flowing purple and blue light" width="1400" height="2100">
-          <div class="lh-frame__prompt">
-            <i class="bi bi-chat-square-text"></i>
-            <span>soft neon ribbons flowing in the dark, cinematic light</span>
-            <i class="bi bi-arrow-return-left"></i>
+        <div class="sk-hero__art" aria-hidden="true">
+          <div class="sk-box sk-window">
+            <div class="sk-window__bar"><i></i><i></i><i></i><span>luma / generate</span></div>
+            <div class="sk-window__body">
+              <div class="sk-prompt">
+                <i class="bi bi-pencil"></i>
+                <span data-i18n="hero.prompt">a cat astronaut, watercolor</span>
+                <span class="sk-prompt__caret"></span>
+                <span class="sk-prompt__go">Go!</span>
+              </div>
+              <div class="sk-canvas">
+                <svg class="sk-sparkle"><use href="#d-sparkle"/></svg>
+                <span data-i18n="hero.canvas">your picture shows up here</span>
+              </div>
+            </div>
           </div>
-        </figure>
 
+          <div class="sk-sticky">
+            <span class="sk-tape"></span>
+            <span data-i18n="hero.sticky">4 people · 4 PCs · 1 web app :)</span>
+          </div>
+        </div>
       </div>
     </header>
 
-    <!-- ================= Marquee ================= -->
-    <div class="lh-marquee lh-mono" aria-hidden="true">
-      <div class="lh-marquee__track">
-        <span>Text to image</span><span>Realistic model</span><span>Anime model</span><span>Background removal</span>
-        <span>Histogram matching</span><span>Gaussian blur</span><span>Grayscale contrast</span><span>Admin dashboard</span>
-        <span>Text to image</span><span>Realistic model</span><span>Anime model</span><span>Background removal</span>
-        <span>Histogram matching</span><span>Gaussian blur</span><span>Grayscale contrast</span><span>Admin dashboard</span>
-      </div>
-    </div>
-
-    <!-- ================= 01 / Features ================= -->
-    <section class="lh-section" id="features">
-      <div class="lh-wrap">
-        <div class="lh-section__head lh-mono">
-          <span>01 / Features</span><span>Everything in one workspace</span>
+    <!-- ================= Features ================= -->
+    <section class="sk-section" id="features">
+      <div class="sk-dots sk-dots--br" aria-hidden="true"></div>
+      <div class="sk-wrap">
+        <div class="sk-section__head">
+          <h2 class="sk-title">
+            <svg class="sk-doodle sk-title__ticks sk-title__ticks--l" aria-hidden="true"><use href="#d-ticks"/></svg>
+            <span data-i18n="feat.title">What can it do?</span>
+            <svg class="sk-doodle sk-title__ticks sk-title__ticks--r" aria-hidden="true"><use href="#d-ticks"/></svg>
+          </h2>
         </div>
+        <p class="sk-sub" data-i18n="feat.sub">The pictures below are real outputs from our own code, not mock-ups.</p>
 
-        <h2 class="lh-section__title lh-reveal">More than a prompt. <em>Real</em> image tools.</h2>
-        <p class="lh-section__lead lh-reveal">
-          Generate with Stable Diffusion, then keep working on the same image with classic image processing,
-          the techniques we built in this course.
-        </p>
+        <div class="sk-features">
 
-        <div class="lh-features">
-          <article class="lh-card lh-reveal">
-            <div class="lh-card__label lh-mono"><span>Generate</span><span>01</span></div>
-            <div class="lh-card__media">
-              <img src="/img/stock/generate.webp" alt="Colorful abstract painting" loading="lazy">
-              <span class="lh-card__tag lh-mono">Realistic · Anime</span>
+          <!-- Text to image -->
+          <article class="sk-box sk-feature sk-reveal">
+            <h3 class="sk-feature__title"><span class="sk-hl sk-hl--yellow" data-i18n="feat.gen.title">Text to Image</span></h3>
+            <p class="sk-feature__text" data-i18n="feat.gen.text">Write a prompt, pick the Realistic or Anime model, and Stable Diffusion Forge on PC2 paints it for you.</p>
+            <div class="sk-window" style="transform:none">
+              <div class="sk-prompt" style="margin:0">
+                <i class="bi bi-chat-square-text"></i>
+                <span data-i18n="feat.gen.prompt">a cozy bookshop at night, anime style</span>
+                <span class="sk-prompt__go">Anime</span>
+              </div>
             </div>
-            <div class="lh-card__body">
-              <h3 class="lh-card__title">Text to Image</h3>
-              <p class="lh-card__text">Write a prompt, pick the Realistic or Anime model, and get a fresh render from our AI server.</p>
+            <p class="sk-proof">
+              <svg><use href="#d-right"/></svg>
+              <span data-i18n="feat.gen.proof">sent to Forge: /sdapi/v1/txt2img</span>
+            </p>
+          </article>
+
+          <!-- Background removal -->
+          <article class="sk-box sk-feature sk-reveal">
+            <h3 class="sk-feature__title"><span class="sk-hl sk-hl--pink" data-i18n="feat.bg.title">Background Removal</span></h3>
+            <p class="sk-feature__text" data-i18n="feat.bg.text">Upload a photo and rembg cuts out the subject. You get a transparent PNG.</p>
+            <div class="sk-cutout">
+              <div class="sk-cutout__img"><img src="/img/stock/removebg.webp" alt="Portrait of a man on a light background" width="600" height="750" loading="lazy"></div>
+              <svg class="sk-doodle sk-arrow-r" aria-hidden="true"><use href="#d-right"/></svg>
+              <div class="sk-cutout__png" data-i18n="feat.bg.png">transparent PNG</div>
             </div>
           </article>
 
-          <article class="lh-card lh-fx-removebg lh-reveal">
-            <div class="lh-card__label lh-mono"><span>Cutouts</span><span>02</span></div>
-            <div class="lh-card__media">
-              <img src="/img/stock/removebg.webp" alt="Portrait of a man on a light background" loading="lazy">
-              <span class="lh-card__tag lh-mono">Hover to cut</span>
+          <!-- Histogram matching -->
+          <article class="sk-box sk-feature sk-feature--wide sk-reveal">
+            <h3 class="sk-feature__title"><span class="sk-hl sk-hl--blue" data-i18n="feat.hm.title">Histogram Matching</span></h3>
+            <p class="sk-feature__text" data-i18n="feat.hm.text">Borrow the colors of one photo and pour them into another. We match the histogram of each RGB channel through its CDF.</p>
+            <div class="sk-equation">
+              <figure class="sk-photo">
+                <span class="sk-tape"></span>
+                <img src="/img/demo/hismat-source.webp" alt="Mountain lake, original colors" width="900" height="600" loading="lazy">
+                <figcaption data-i18n="feat.hm.source">source</figcaption>
+              </figure>
+              <span class="sk-op" aria-hidden="true">+</span>
+              <figure class="sk-photo">
+                <span class="sk-tape"></span>
+                <img src="/img/demo/hismat-reference.webp" alt="Sunset mountains, color reference" width="900" height="600" loading="lazy">
+                <figcaption data-i18n="feat.hm.ref">reference</figcaption>
+              </figure>
+              <span class="sk-op" aria-hidden="true">=</span>
+              <figure class="sk-photo">
+                <span class="sk-tape"></span>
+                <img src="/img/demo/hismat-result.webp" alt="Mountain lake with sunset colors after histogram matching" width="900" height="600" loading="lazy">
+                <figcaption data-i18n="feat.hm.result">result!</figcaption>
+              </figure>
             </div>
-            <div class="lh-card__body">
-              <h3 class="lh-card__title">Background Removal</h3>
-              <p class="lh-card__text">Remove the background from any photo and download a clean transparent PNG.</p>
-            </div>
+            <p class="sk-proof">
+              <svg><use href="#d-right"/></svg>
+              <span data-i18n-html="feat.hm.proof">real output from <code>hismat.py</code></span>
+            </p>
           </article>
 
-          <article class="lh-card lh-fx-hismat lh-reveal">
-            <div class="lh-card__label lh-mono"><span>Color</span><span>03</span></div>
-            <div class="lh-card__media">
-              <img src="/img/stock/hismat.webp" alt="Mountain lake under a cloudy sky" loading="lazy">
-              <span class="lh-card__tag lh-mono">Hover to match</span>
+          <!-- Blur -->
+          <article class="sk-box sk-feature sk-reveal">
+            <h3 class="sk-feature__title"><span class="sk-hl sk-hl--green" data-i18n="feat.blur.title">Gaussian Blur</span></h3>
+            <p class="sk-feature__text" data-i18n="feat.blur.text">Soften a photo with low, medium or high strength. Drag the line to compare.</p>
+            <div class="sk-compare">
+              <img src="/img/demo/blur-before.webp" alt="Camera lens, sharp" width="900" height="600" loading="lazy">
+              <img class="sk-compare__after" src="/img/demo/blur-after.webp" alt="Camera lens, blurred" width="900" height="600" loading="lazy">
+              <span class="sk-compare__tag sk-compare__tag--before" data-i18n="cmp.before">before</span>
+              <span class="sk-compare__tag sk-compare__tag--after" data-i18n="cmp.after">after</span>
+              <span class="sk-compare__line"></span>
+              <span class="sk-compare__knob"><i class="bi bi-arrow-left-right"></i></span>
+              <input type="range" min="0" max="100" value="50" data-i18n-aria="cmp.aria" aria-label="Compare before and after">
             </div>
-            <div class="lh-card__body">
-              <h3 class="lh-card__title">Histogram Matching</h3>
-              <p class="lh-card__text">Transfer the color mood of a reference image onto your photo, channel by channel.</p>
-            </div>
+            <p class="sk-proof">
+              <svg><use href="#d-right"/></svg>
+              <span data-i18n-html="feat.blur.proof">real output from <code>blur.py</code>, strength: high</span>
+            </p>
           </article>
 
-          <article class="lh-card lh-fx-blur lh-reveal">
-            <div class="lh-card__label lh-mono"><span>Filter</span><span>04</span></div>
-            <div class="lh-card__media">
-              <img src="/img/stock/blur.webp" alt="Close-up of a camera lens" loading="lazy">
-              <span class="lh-card__tag lh-mono">Hover to blur</span>
+          <!-- Grayscale + contrast -->
+          <article class="sk-box sk-feature sk-reveal">
+            <h3 class="sk-feature__title"><span class="sk-hl sk-hl--purple" data-i18n="feat.gray.title">Grayscale &amp; Contrast</span></h3>
+            <p class="sk-feature__text" data-i18n="feat.gray.text">Turn a photo gray, then stretch its contrast with histogram equalization.</p>
+            <div class="sk-compare">
+              <img src="/img/demo/contrast-before.webp" alt="Mountain lake in color" width="900" height="600" loading="lazy">
+              <img class="sk-compare__after" src="/img/demo/contrast-after.webp" alt="Mountain lake in grayscale with equalized contrast" width="900" height="600" loading="lazy">
+              <span class="sk-compare__tag sk-compare__tag--before" data-i18n="cmp.before">before</span>
+              <span class="sk-compare__tag sk-compare__tag--after" data-i18n="cmp.after">after</span>
+              <span class="sk-compare__line"></span>
+              <span class="sk-compare__knob"><i class="bi bi-arrow-left-right"></i></span>
+              <input type="range" min="0" max="100" value="50" data-i18n-aria="cmp.aria" aria-label="Compare before and after">
             </div>
-            <div class="lh-card__body">
-              <h3 class="lh-card__title">Gaussian Blur</h3>
-              <p class="lh-card__text">Soften an image with low, medium or high strength in a single click.</p>
-            </div>
+            <p class="sk-proof">
+              <svg><use href="#d-right"/></svg>
+              <span data-i18n-html="feat.gray.proof">real output from <code>contrast.py</code></span>
+            </p>
           </article>
 
-          <article class="lh-card lh-fx-gray lh-reveal">
-            <div class="lh-card__label lh-mono"><span>Contrast</span><span>05</span></div>
-            <div class="lh-card__media">
-              <img src="/img/stock/gray.webp" alt="Layered mountains at sunset" loading="lazy">
-              <span class="lh-card__tag lh-mono">Hover to equalize</span>
-            </div>
-            <div class="lh-card__body">
-              <h3 class="lh-card__title">Grayscale &amp; Contrast</h3>
-              <p class="lh-card__text">Convert to grayscale and stretch contrast with histogram equalization.</p>
-            </div>
-          </article>
-
-          <article class="lh-card lh-reveal">
-            <div class="lh-card__label lh-mono"><span>Workspace</span><span>06</span></div>
-            <div class="lh-card__media">
-              <img src="/img/stock/cta.webp" alt="Deep blue and purple flowing shapes" loading="lazy">
-              <span class="lh-card__tag lh-mono">/generate</span>
-            </div>
-            <div class="lh-card__body">
-              <h3 class="lh-card__title">One studio, every tool</h3>
-              <p class="lh-card__text">Sign in once and switch between generating and editing without leaving the page.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= 02 / Workflow ================= -->
-    <section class="lh-section" id="workflow">
-      <div class="lh-wrap">
-        <div class="lh-section__head lh-mono">
-          <span>02 / Workflow</span><span>Three steps</span>
-        </div>
-
-        <h2 class="lh-section__title lh-reveal">From idea to image in <em>minutes.</em></h2>
-        <p class="lh-section__lead lh-reveal">No install, no setup. Everything runs on our own servers.</p>
-
-        <div class="lh-steps">
-          <div class="lh-step lh-reveal">
-            <span class="lh-step__letter">A</span>
-            <h3 class="lh-step__title">Sign in</h3>
-            <p class="lh-step__text">Create a free account so your work stays tied to you.</p>
-          </div>
-          <div class="lh-step lh-reveal">
-            <span class="lh-step__letter">B</span>
-            <h3 class="lh-step__title">Prompt or upload</h3>
-            <p class="lh-step__text">Describe what you want, or bring your own photo to edit.</p>
-          </div>
-          <div class="lh-step lh-reveal">
-            <span class="lh-step__letter">C</span>
-            <h3 class="lh-step__title">Refine &amp; download</h3>
-            <p class="lh-step__text">Apply the tools you need and save the result as PNG.</p>
-          </div>
         </div>
       </div>
     </section>
 
-    <!-- ================= 03 / Team ================= -->
-    <section class="lh-section lh-team" id="team">
-      <div class="lh-halftone lh-halftone--tl" aria-hidden="true"></div>
-      <div class="lh-halftone lh-halftone--br" aria-hidden="true"></div>
-
-      <div class="lh-wrap">
-        <div class="lh-section__head lh-mono">
-          <span>03 / Team</span><span>Image Processing · Term Project</span>
+    <!-- ================= How it works ================= -->
+    <section class="sk-section" id="how">
+      <div class="sk-dots sk-dots--tl" aria-hidden="true"></div>
+      <div class="sk-wrap">
+        <div class="sk-section__head">
+          <h2 class="sk-title">
+            <svg class="sk-doodle sk-title__ticks sk-title__ticks--l" aria-hidden="true"><use href="#d-ticks"/></svg>
+            <span class="sk-hl sk-hl--yellow" data-i18n="how.title">How it works</span>
+            <svg class="sk-doodle sk-title__ticks sk-title__ticks--r" aria-hidden="true"><use href="#d-ticks"/></svg>
+          </h2>
         </div>
+        <p class="sk-sub" data-i18n="how.sub">Four computers on one network, each with its own job.</p>
 
-        <div class="lh-team__stage">
+        <div class="sk-arch sk-reveal">
+          <div class="sk-arch__notes">
+            <p class="sk-side-note sk-side-note--l"><span data-i18n="how.note.browser">you open the web app here!</span><svg class="sk-doodle"><use href="#d-right"/></svg></p>
+            <p class="sk-side-note sk-side-note--l"><span data-i18n="how.note.backend">handles requests, jobs and logins</span><svg class="sk-doodle"><use href="#d-right"/></svg></p>
+          </div>
+
+          <div class="sk-arch__col">
+            <div class="sk-box sk-node">
+              <span class="sk-node__icon"><i class="bi bi-window"></i></span>
+              <div>
+                <h3 class="sk-node__name" data-i18n="how.browser">Browser</h3>
+                <ul class="sk-node__list"><li data-i18n="how.browser.1">The user opens LUMA</li></ul>
+              </div>
+            </div>
+            <svg class="sk-doodle sk-down" aria-hidden="true"><use href="#d-down"/></svg>
+            <div class="sk-box sk-node">
+              <span class="sk-node__icon"><i class="bi bi-pc-display"></i></span>
+              <div>
+                <h3 class="sk-node__name"><span class="sk-hl sk-hl--blue">PC1</span>: Frontend + Nginx</h3>
+                <ul class="sk-node__list">
+                  <li data-i18n="how.pc1.1">Serves the web pages</li>
+                  <li data-i18n="how.pc1.2">Reverse proxy for /api/*</li>
+                </ul>
+              </div>
+            </div>
+            <svg class="sk-doodle sk-down" aria-hidden="true"><use href="#d-down"/></svg>
+            <div class="sk-box sk-node">
+              <span class="sk-node__icon"><i class="bi bi-hdd-stack"></i></span>
+              <div>
+                <h3 class="sk-node__name"><span class="sk-hl sk-hl--green">PC3</span>: Flask Backend</h3>
+                <ul class="sk-node__list">
+                  <li data-i18n="how.pc3.1">APIs and login</li>
+                  <li data-i18n="how.pc3.2">Blur, histogram matching, contrast</li>
+                  <li data-i18n="how.pc3.3">Talks to the AI and the database</li>
+                </ul>
+              </div>
+            </div>
+            <svg class="sk-doodle sk-branch" viewBox="0 0 400 44" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M200 2 L200 18 M100 18 L300 18 M100 18 L100 38 M300 18 L300 38 M92 30 L100 40 L108 30 M292 30 L300 40 L308 30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <div class="sk-arch__split">
+              <div class="sk-box sk-node">
+                <span class="sk-node__icon"><i class="bi bi-cpu"></i></span>
+                <div>
+                  <h3 class="sk-node__name"><span class="sk-hl sk-hl--pink">PC2</span>: Forge AI</h3>
+                  <ul class="sk-node__list">
+                    <li data-i18n="how.pc2.1">Text to image</li>
+                    <li data-i18n="how.pc2.2">Background removal (rembg)</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="sk-box sk-node">
+                <span class="sk-node__icon"><i class="bi bi-database"></i></span>
+                <div>
+                  <h3 class="sk-node__name"><span class="sk-hl sk-hl--purple">PC4</span>: PostgreSQL</h3>
+                  <ul class="sk-node__list">
+                    <li data-i18n="how.pc4.1">Users</li>
+                    <li data-i18n="how.pc4.2">Image job logs</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sk-arch__notes">
+            <p class="sk-side-note sk-side-note--r"><svg class="sk-doodle" style="transform:scaleX(-1)"><use href="#d-right"/></svg><span data-i18n="how.note.nginx">routes every request</span></p>
+            <p class="sk-side-note sk-side-note--r"><svg class="sk-doodle" style="transform:scaleX(-1)"><use href="#d-right"/></svg><span data-i18n="how.note.data">AI paints, database remembers</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Team ================= -->
+    <section class="sk-section" id="team">
+      <div class="sk-dots sk-dots--tl" aria-hidden="true"></div>
+      <div class="sk-dots sk-dots--br" aria-hidden="true"></div>
+      <div class="sk-wrap">
+        <div class="sk-team__stage">
           <div>
-            <div class="lh-team__titlewrap lh-reveal">
-              <h2 class="lh-team__title">
-                Our Team
-                <svg class="lh-team__bang" viewBox="0 0 80 90" fill="none" aria-hidden="true">
-                  <path d="M14 40 L30 6 L40 10 L24 44 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M36 58 L66 36 L72 44 L42 66 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M30 76 L74 74 L74 84 L30 86 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
-                </svg>
+            <div class="sk-team__head">
+              <h2 class="sk-team__title">
+                <span data-i18n="team.title">Our Team</span>
+                <svg class="sk-doodle sk-team__bang" aria-hidden="true"><use href="#d-bang"/></svg>
               </h2>
             </div>
 
-            <div class="lh-team__card lh-reveal">
-              <div class="lh-member">
-                <div class="lh-member__photo"><img src="/img/team/ohm.webp" alt="Ohm" width="400" height="400" loading="lazy"></div>
-                <h3 class="lh-member__name">Ohm</h3>
-                <span class="lh-member__role lh-mono">Database</span>
-                <p class="lh-member__id">6710301018</p>
+            <div class="sk-box sk-team__card sk-reveal">
+              <div class="sk-member">
+                <div class="sk-member__photo"><img src="/img/team/ohm.webp" alt="Ohm" width="400" height="400" loading="lazy"></div>
+                <h3 class="sk-member__name">Ohm</h3>
+                <span class="sk-member__role sk-hl sk-hl--purple" data-i18n="team.db">Database</span>
+                <p class="sk-member__id">6710301018</p>
               </div>
-              <div class="lh-member">
-                <div class="lh-member__photo"><img src="/img/team/nice.webp" alt="Nice" width="400" height="400" loading="lazy"></div>
-                <h3 class="lh-member__name">Nice</h3>
-                <span class="lh-member__role lh-mono">Frontend</span>
-                <p class="lh-member__id">6710301024</p>
+              <div class="sk-member">
+                <div class="sk-member__photo"><img src="/img/team/nice.webp" alt="Nice" width="400" height="400" loading="lazy"></div>
+                <h3 class="sk-member__name">Nice</h3>
+                <span class="sk-member__role sk-hl sk-hl--blue" data-i18n="team.fe">Frontend</span>
+                <p class="sk-member__id">6710301024</p>
               </div>
-              <div class="lh-member">
-                <div class="lh-member__photo"><img src="/img/team/phang.webp" alt="Phang" width="400" height="400" loading="lazy"></div>
-                <h3 class="lh-member__name">Phang</h3>
-                <span class="lh-member__role lh-mono">Backend</span>
-                <p class="lh-member__id">6710301017</p>
+              <div class="sk-member">
+                <div class="sk-member__photo"><img src="/img/team/phang.webp" alt="Phang" width="400" height="400" loading="lazy"></div>
+                <h3 class="sk-member__name">Phang</h3>
+                <span class="sk-member__role sk-hl sk-hl--green" data-i18n="team.be">Backend</span>
+                <p class="sk-member__id">6710301017</p>
               </div>
-              <div class="lh-member">
-                <div class="lh-member__photo"><img src="/img/team/baiboon.webp" alt="Baiboon" width="400" height="400" loading="lazy"></div>
-                <h3 class="lh-member__name">Baiboon</h3>
-                <span class="lh-member__role lh-mono">DevOps + AI</span>
-                <p class="lh-member__id">6710301033</p>
+              <div class="sk-member">
+                <div class="sk-member__photo"><img src="/img/team/baiboon.webp" alt="Baiboon" width="400" height="400" loading="lazy"></div>
+                <h3 class="sk-member__name">Baiboon</h3>
+                <span class="sk-member__role sk-hl sk-hl--pink" data-i18n="team.ops">DevOps + AI</span>
+                <p class="sk-member__id">6710301033</p>
               </div>
             </div>
           </div>
 
-          <div class="lh-team__side lh-reveal">
-            <svg class="lh-cloud" viewBox="0 0 260 150" fill="none" aria-hidden="true">
-              <path d="M18 132 C2 128 4 96 26 92 C24 66 52 52 72 64 C80 34 112 20 136 30 C150 4 196 2 214 28 C240 22 262 44 258 70 L258 136 Z"
-                    stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <ul class="lh-team__ids" aria-label="Student IDs">
+          <div class="sk-team__side sk-reveal">
+            <svg class="sk-doodle sk-cloud" aria-hidden="true"><use href="#d-cloud"/></svg>
+            <ul class="sk-team__ids" aria-label="Student IDs">
               <li>No.</li>
               <li>6710301018</li>
               <li>6710301024</li>
@@ -295,40 +398,33 @@
             </ul>
           </div>
         </div>
-
-        <p class="lh-team__caption lh-mono">LUMA · Group 11</p>
       </div>
     </section>
 
-    <!-- ================= Final CTA ================= -->
-    <section class="lh-cta" id="start">
-      <div class="lh-wrap">
-        <span class="lh-mono">Free to start · No credit card</span>
-        <h2 class="lh-section__title">Start <em>creating.</em></h2>
-        <p>Your first render is a prompt away.</p>
-        <div class="lh-hero__ctas" style="justify-content:center;margin:0">
-          <a href="/generate" class="lh-btn lh-btn--solid lh-btn--lg"><i class="bi bi-palette"></i> Open Workspace</a>
-          <a href="/auth/login" class="lh-btn lh-btn--lg">Sign In</a>
+    <!-- ================= CTA ================= -->
+    <section class="sk-section" id="start">
+      <div class="sk-wrap">
+        <div class="sk-box sk-cta__box">
+          <svg class="sk-sparkle sk-spark-3" aria-hidden="true"><use href="#d-sparkle"/></svg>
+          <svg class="sk-sparkle sk-spark-4" aria-hidden="true"><use href="#d-sparkle"/></svg>
+          <h2 class="sk-title" data-i18n="cta.title">Ready to make something?</h2>
+          <p data-i18n="cta.text">Sign in and your first picture is one sentence away.</p>
+          <div class="sk-cta__btns">
+            <a href="/generate" class="sk-btn sk-btn--primary sk-btn--lg"><i class="bi bi-palette"></i> <span data-i18n="cta.open">Open the workspace</span></a>
+            <a href="/auth/login" class="sk-btn sk-btn--lg" data-i18n="nav.signin">Sign In</a>
+          </div>
         </div>
       </div>
     </section>
 
   </main>
 
-  <footer class="lh-footer lh-mono">
-    <div class="lh-wrap lh-footer__inner">
-      <span><i class="bi bi-stars"></i> LUMA Group 11 · Image Processing Term Project</span>
-      <span>Stock photos: <a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash</a></span>
+  <footer class="sk-footer">
+    <div class="sk-wrap sk-footer__inner">
+      <span data-i18n="footer.made">LUMA Group11 · Image Processing term project</span>
+      <span><span data-i18n="footer.photos">Sample photos:</span> <a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash</a></span>
     </div>
   </footer>
-
-  <!-- ตัวชี้ section มุมขวาล่าง (แบบ ArtCraft) -->
-  <ul class="lh-index" aria-label="Sections">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#workflow">Workflow</a></li>
-    <li><a href="#team">Team</a></li>
-    <li><a href="#start">Get Started</a></li>
-  </ul>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -338,41 +434,8 @@
   <!-- ปุ่มเปลี่ยนธีม -->
   <script src="/js/theme.js"></script>
 
-  <script>
-    // Reveal on scroll + ไฮไลต์ section ที่กำลังดู (เฉพาะหน้าแรก)
-    (() => {
-      const reveals = document.querySelectorAll('.lh-reveal');
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      if (reduce || !('IntersectionObserver' in window)) {
-        reveals.forEach(el => el.classList.add('is-in'));
-      } else {
-        const io = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-in');
-              io.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.12 });
-        reveals.forEach(el => io.observe(el));
-      }
-
-      const links = document.querySelectorAll('.lh-index a, .lh-nav__links a');
-      if (!('IntersectionObserver' in window)) return;
-      const spy = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          const id = '#' + entry.target.id;
-          links.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === id));
-        });
-      }, { rootMargin: '-45% 0px -50% 0px' });
-      ['features', 'workflow', 'team', 'start'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) spy.observe(el);
-      });
-    })();
-  </script>
+  <!-- สลับภาษา TH / EN + slider before/after + reveal (เฉพาะหน้าแรก) -->
+  <script src="/js/home-i18n.js?v=1"></script>
 
 </body>
 </html>
