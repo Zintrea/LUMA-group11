@@ -5,7 +5,15 @@ DROP TYPE IF EXISTS task_type_enum;
 DROP TYPE IF EXISTS task_status_enum;
 
 -- 1. สร้าง Enum สำหรับประเภทงานและสถานะ[cite: 2]
-CREATE TYPE task_type_enum AS ENUM ('generate', 'remove_bg', 'enhance');
+CREATE TYPE task_type_enum AS ENUM (
+    'generate',
+    'remove_bg',
+    'enhance',
+    'hismat',
+    'rembg',
+    'blur',
+    'contrast'
+);
 CREATE TYPE task_status_enum AS ENUM ('pending', 'processing', 'completed', 'failed');
 
 -- 2. สร้างตาราง users (อัปเดตโครงสร้างล่าสุดตาม log.md)
