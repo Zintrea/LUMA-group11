@@ -4,91 +4,375 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LUMA - AI Image Generator</title>
+  <meta name="description" content="LUMA turns text prompts into images and gives you image processing tools: background removal, histogram matching, blur and grayscale contrast.">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
-  <!-- แก้ path ให้ตรงกับโฟลเดอร์จริง -->
-  <link rel="stylesheet" href="/css/style.css?v=99">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;650;700&family=Gochi+Hand&family=Instrument+Serif:ital@1&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- หน้าแรกใช้ stylesheet ของตัวเอง (ไม่โหลด style.css เพื่อไม่ให้กฎ light-mode ของหน้าอื่นทับดีไซน์) -->
+  <link rel="stylesheet" href="/css/home.css?v=1">
   <script>
     // ดึงค่าธีมจาก LocalStorage มาใช้ทันที (แชร์กันทุกหน้า)
-    const savedTheme = localStorage.getItem('luma_theme') || 'dark'; // ปรับ default เป็น dark
+    const savedTheme = localStorage.getItem('luma_theme') || 'dark';
     document.documentElement.setAttribute('data-bs-theme', savedTheme);
   </script>
 </head>
 
-<body>
+<body class="lh">
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg topbar px-3 py-2 navbar-dark">
-    <div class="container-fluid">
-      
-      <a class="navbar-brand text-white fw-bold" href="/">
-        <i class="bi bi-stars text-primary"></i> LUMA Group11
+  <!-- ================= Navbar ================= -->
+  <nav class="lh-nav" aria-label="Main">
+    <div class="lh-wrap lh-nav__inner">
+      <a class="lh-brand" href="/">
+        <i class="bi bi-stars"></i> LUMA <small>GROUP 11</small>
       </a>
 
-      <div class="ms-auto d-flex gap-2 align-items-center">
-        
-        <a href="/auth/login" class="btn btn-outline-light" id="navLoginBtn">
-          Sign In
-        </a>
+      <ul class="lh-nav__links lh-mono">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#workflow">Workflow</a></li>
+        <li><a href="#team">Team</a></li>
+      </ul>
 
-        <a href="/auth/login" class="btn btn-primary fw-bold" id="navStartBtn">
-          Get Started
-        </a>
+      <div class="lh-nav__actions">
+        <a href="/auth/login" class="lh-btn" id="navLoginBtn">Sign In</a>
+        <a href="/auth/login" class="lh-btn lh-btn--solid" id="navStartBtn">Get Started</a>
 
-        <!-- ================= ปุ่มเปลี่ยนธีม ================= -->
-        <button id="themeToggleBtn" class="btn btn-outline-secondary rounded-circle ms-2 d-flex align-items-center justify-content-center" type="button" style="width: 38px; height: 38px;" aria-label="Toggle theme">
+        <!-- ปุ่มเปลี่ยนธีม (id เดิม ใช้ร่วมกับ theme.js) -->
+        <button id="themeToggleBtn" class="btn btn-outline-secondary lh-icon-btn" type="button" aria-label="Toggle theme">
           <i id="themeIcon" class="bi bi-sun-fill"></i>
         </button>
-
       </div>
     </div>
   </nav>
 
+  <main>
 
-  <!-- Hero Section -->
-  <div class="hero-section text-center d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 60px);">
-    <div class="container">
-      
-      <h1 class="hero-title fw-bold text-white mb-4">
-        Bring Your Imagination to
-        <span class="text-primary">Life</span>
-      </h1>
+    <!-- ================= Hero ================= -->
+    <header class="lh-hero" id="top">
+      <div class="lh-hero__glow" aria-hidden="true"></div>
+      <div class="lh-wrap lh-hero__grid">
 
-      <p class="lead text-secondary mb-5 mx-auto" style="max-width: 600px;">
-        Transform your text descriptions into stunning, high-quality images in seconds powered by advanced AI technology.
-      </p>
+        <div class="lh-reveal">
+          <div class="lh-eyebrow lh-mono">
+            <span class="lh-dot-live"></span> AI image studio · Group 11
+          </div>
 
-      <a href="/auth/login" class="btn btn-primary btn-lg fw-bold px-5 py-3 shadow-lg" id="heroCtaBtn">
-        <i class="bi bi-magic me-2"></i> Start Generating for Free
-      </a>
+          <h1 class="lh-hero__title">
+            Bring your imagination to <em>life.</em>
+          </h1>
 
-      <div class="mt-5 text-muted small">
-        <div class="d-flex justify-content-center gap-4">
-          <span>
-            <i class="bi bi-check-circle-fill text-success me-1"></i> Fast Processing
-          </span>
-          <span>
-            <i class="bi bi-check-circle-fill text-success me-1"></i> High Resolution
-          </span>
-          <span>
-            <i class="bi bi-check-circle-fill text-success me-1"></i> No Credit Card Required
-          </span>
+          <p class="lh-hero__lead">
+            Describe a scene and LUMA renders it in seconds. Then refine it with real image processing tools:
+            remove backgrounds, match colors, blur and boost contrast, all in one workspace.
+          </p>
+
+          <div class="lh-hero__ctas">
+            <a href="/auth/login" class="lh-btn lh-btn--solid lh-btn--lg" id="heroCtaBtn">
+              <i class="bi bi-magic"></i> Start Generating for Free
+            </a>
+            <a href="#features" class="lh-btn lh-btn--lg">Explore features</a>
+          </div>
+
+          <div class="lh-hero__meta lh-mono">
+            <span><i class="bi bi-lightning-charge-fill"></i>Fast processing</span>
+            <span><i class="bi bi-aspect-ratio"></i>High resolution</span>
+            <span><i class="bi bi-credit-card-2-front"></i>No credit card</span>
+          </div>
+        </div>
+
+        <figure class="lh-frame lh-reveal" style="margin:0">
+          <span class="lh-frame__corner lh-frame__corner--tl" aria-hidden="true"></span>
+          <span class="lh-frame__corner lh-frame__corner--br" aria-hidden="true"></span>
+          <figcaption class="lh-frame__bar lh-mono">
+            <span>Render / 001</span><span>512 × 640</span>
+          </figcaption>
+          <img class="lh-frame__img" src="/img/stock/hero.webp" alt="Abstract flowing purple and blue light" width="1400" height="2100">
+          <div class="lh-frame__prompt">
+            <i class="bi bi-chat-square-text"></i>
+            <span>soft neon ribbons flowing in the dark, cinematic light</span>
+            <i class="bi bi-arrow-return-left"></i>
+          </div>
+        </figure>
+
+      </div>
+    </header>
+
+    <!-- ================= Marquee ================= -->
+    <div class="lh-marquee lh-mono" aria-hidden="true">
+      <div class="lh-marquee__track">
+        <span>Text to image</span><span>Realistic model</span><span>Anime model</span><span>Background removal</span>
+        <span>Histogram matching</span><span>Gaussian blur</span><span>Grayscale contrast</span><span>Admin dashboard</span>
+        <span>Text to image</span><span>Realistic model</span><span>Anime model</span><span>Background removal</span>
+        <span>Histogram matching</span><span>Gaussian blur</span><span>Grayscale contrast</span><span>Admin dashboard</span>
+      </div>
+    </div>
+
+    <!-- ================= 01 / Features ================= -->
+    <section class="lh-section" id="features">
+      <div class="lh-wrap">
+        <div class="lh-section__head lh-mono">
+          <span>01 / Features</span><span>Everything in one workspace</span>
+        </div>
+
+        <h2 class="lh-section__title lh-reveal">More than a prompt. <em>Real</em> image tools.</h2>
+        <p class="lh-section__lead lh-reveal">
+          Generate with Stable Diffusion, then keep working on the same image with classic image processing,
+          the techniques we built in this course.
+        </p>
+
+        <div class="lh-features">
+          <article class="lh-card lh-reveal">
+            <div class="lh-card__label lh-mono"><span>Generate</span><span>01</span></div>
+            <div class="lh-card__media">
+              <img src="/img/stock/generate.webp" alt="Colorful abstract painting" loading="lazy">
+              <span class="lh-card__tag lh-mono">Realistic · Anime</span>
+            </div>
+            <div class="lh-card__body">
+              <h3 class="lh-card__title">Text to Image</h3>
+              <p class="lh-card__text">Write a prompt, pick the Realistic or Anime model, and get a fresh render from our AI server.</p>
+            </div>
+          </article>
+
+          <article class="lh-card lh-fx-removebg lh-reveal">
+            <div class="lh-card__label lh-mono"><span>Cutouts</span><span>02</span></div>
+            <div class="lh-card__media">
+              <img src="/img/stock/removebg.webp" alt="Portrait of a man on a light background" loading="lazy">
+              <span class="lh-card__tag lh-mono">Hover to cut</span>
+            </div>
+            <div class="lh-card__body">
+              <h3 class="lh-card__title">Background Removal</h3>
+              <p class="lh-card__text">Remove the background from any photo and download a clean transparent PNG.</p>
+            </div>
+          </article>
+
+          <article class="lh-card lh-fx-hismat lh-reveal">
+            <div class="lh-card__label lh-mono"><span>Color</span><span>03</span></div>
+            <div class="lh-card__media">
+              <img src="/img/stock/hismat.webp" alt="Mountain lake under a cloudy sky" loading="lazy">
+              <span class="lh-card__tag lh-mono">Hover to match</span>
+            </div>
+            <div class="lh-card__body">
+              <h3 class="lh-card__title">Histogram Matching</h3>
+              <p class="lh-card__text">Transfer the color mood of a reference image onto your photo, channel by channel.</p>
+            </div>
+          </article>
+
+          <article class="lh-card lh-fx-blur lh-reveal">
+            <div class="lh-card__label lh-mono"><span>Filter</span><span>04</span></div>
+            <div class="lh-card__media">
+              <img src="/img/stock/blur.webp" alt="Close-up of a camera lens" loading="lazy">
+              <span class="lh-card__tag lh-mono">Hover to blur</span>
+            </div>
+            <div class="lh-card__body">
+              <h3 class="lh-card__title">Gaussian Blur</h3>
+              <p class="lh-card__text">Soften an image with low, medium or high strength in a single click.</p>
+            </div>
+          </article>
+
+          <article class="lh-card lh-fx-gray lh-reveal">
+            <div class="lh-card__label lh-mono"><span>Contrast</span><span>05</span></div>
+            <div class="lh-card__media">
+              <img src="/img/stock/gray.webp" alt="Layered mountains at sunset" loading="lazy">
+              <span class="lh-card__tag lh-mono">Hover to equalize</span>
+            </div>
+            <div class="lh-card__body">
+              <h3 class="lh-card__title">Grayscale &amp; Contrast</h3>
+              <p class="lh-card__text">Convert to grayscale and stretch contrast with histogram equalization.</p>
+            </div>
+          </article>
+
+          <article class="lh-card lh-reveal">
+            <div class="lh-card__label lh-mono"><span>Workspace</span><span>06</span></div>
+            <div class="lh-card__media">
+              <img src="/img/stock/cta.webp" alt="Deep blue and purple flowing shapes" loading="lazy">
+              <span class="lh-card__tag lh-mono">/generate</span>
+            </div>
+            <div class="lh-card__body">
+              <h3 class="lh-card__title">One studio, every tool</h3>
+              <p class="lh-card__text">Sign in once and switch between generating and editing without leaving the page.</p>
+            </div>
+          </article>
         </div>
       </div>
+    </section>
 
+    <!-- ================= 02 / Workflow ================= -->
+    <section class="lh-section" id="workflow">
+      <div class="lh-wrap">
+        <div class="lh-section__head lh-mono">
+          <span>02 / Workflow</span><span>Three steps</span>
+        </div>
+
+        <h2 class="lh-section__title lh-reveal">From idea to image in <em>minutes.</em></h2>
+        <p class="lh-section__lead lh-reveal">No install, no setup. Everything runs on our own servers.</p>
+
+        <div class="lh-steps">
+          <div class="lh-step lh-reveal">
+            <span class="lh-step__letter">A</span>
+            <h3 class="lh-step__title">Sign in</h3>
+            <p class="lh-step__text">Create a free account so your work stays tied to you.</p>
+          </div>
+          <div class="lh-step lh-reveal">
+            <span class="lh-step__letter">B</span>
+            <h3 class="lh-step__title">Prompt or upload</h3>
+            <p class="lh-step__text">Describe what you want, or bring your own photo to edit.</p>
+          </div>
+          <div class="lh-step lh-reveal">
+            <span class="lh-step__letter">C</span>
+            <h3 class="lh-step__title">Refine &amp; download</h3>
+            <p class="lh-step__text">Apply the tools you need and save the result as PNG.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03 / Team ================= -->
+    <section class="lh-section lh-team" id="team">
+      <div class="lh-halftone lh-halftone--tl" aria-hidden="true"></div>
+      <div class="lh-halftone lh-halftone--br" aria-hidden="true"></div>
+
+      <div class="lh-wrap">
+        <div class="lh-section__head lh-mono">
+          <span>03 / Team</span><span>Image Processing · Term Project</span>
+        </div>
+
+        <div class="lh-team__stage">
+          <div>
+            <div class="lh-team__titlewrap lh-reveal">
+              <h2 class="lh-team__title">
+                Our Team
+                <svg class="lh-team__bang" viewBox="0 0 80 90" fill="none" aria-hidden="true">
+                  <path d="M14 40 L30 6 L40 10 L24 44 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+                  <path d="M36 58 L66 36 L72 44 L42 66 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+                  <path d="M30 76 L74 74 L74 84 L30 86 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+                </svg>
+              </h2>
+            </div>
+
+            <div class="lh-team__card lh-reveal">
+              <div class="lh-member">
+                <div class="lh-member__photo"><img src="/img/team/ohm.webp" alt="Ohm" width="400" height="400" loading="lazy"></div>
+                <h3 class="lh-member__name">Ohm</h3>
+                <span class="lh-member__role lh-mono">Database</span>
+                <p class="lh-member__id">6710301018</p>
+              </div>
+              <div class="lh-member">
+                <div class="lh-member__photo"><img src="/img/team/nice.webp" alt="Nice" width="400" height="400" loading="lazy"></div>
+                <h3 class="lh-member__name">Nice</h3>
+                <span class="lh-member__role lh-mono">Frontend</span>
+                <p class="lh-member__id">6710301024</p>
+              </div>
+              <div class="lh-member">
+                <div class="lh-member__photo"><img src="/img/team/phang.webp" alt="Phang" width="400" height="400" loading="lazy"></div>
+                <h3 class="lh-member__name">Phang</h3>
+                <span class="lh-member__role lh-mono">Backend</span>
+                <p class="lh-member__id">6710301017</p>
+              </div>
+              <div class="lh-member">
+                <div class="lh-member__photo"><img src="/img/team/baiboon.webp" alt="Baiboon" width="400" height="400" loading="lazy"></div>
+                <h3 class="lh-member__name">Baiboon</h3>
+                <span class="lh-member__role lh-mono">DevOps + AI</span>
+                <p class="lh-member__id">6710301033</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="lh-team__side lh-reveal">
+            <svg class="lh-cloud" viewBox="0 0 260 150" fill="none" aria-hidden="true">
+              <path d="M18 132 C2 128 4 96 26 92 C24 66 52 52 72 64 C80 34 112 20 136 30 C150 4 196 2 214 28 C240 22 262 44 258 70 L258 136 Z"
+                    stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <ul class="lh-team__ids" aria-label="Student IDs">
+              <li>No.</li>
+              <li>6710301018</li>
+              <li>6710301024</li>
+              <li>6710301017</li>
+              <li>6710301033</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="lh-team__caption lh-mono">LUMA · Group 11</p>
+      </div>
+    </section>
+
+    <!-- ================= Final CTA ================= -->
+    <section class="lh-cta" id="start">
+      <div class="lh-wrap">
+        <span class="lh-mono">Free to start · No credit card</span>
+        <h2 class="lh-section__title">Start <em>creating.</em></h2>
+        <p>Your first render is a prompt away.</p>
+        <div class="lh-hero__ctas" style="justify-content:center;margin:0">
+          <a href="/generate" class="lh-btn lh-btn--solid lh-btn--lg"><i class="bi bi-palette"></i> Open Workspace</a>
+          <a href="/auth/login" class="lh-btn lh-btn--lg">Sign In</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="lh-footer lh-mono">
+    <div class="lh-wrap lh-footer__inner">
+      <span><i class="bi bi-stars"></i> LUMA Group 11 · Image Processing Term Project</span>
+      <span>Stock photos: <a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash</a></span>
     </div>
-  </div>
+  </footer>
 
+  <!-- ตัวชี้ section มุมขวาล่าง (แบบ ArtCraft) -->
+  <ul class="lh-index" aria-label="Sections">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#workflow">Workflow</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#start">Get Started</a></li>
+  </ul>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- แก้ path + cache bust -->
+  <!-- ตรวจ Session แล้วเปลี่ยนปุ่มเป็น Workspace -->
   <script src="/js/home.js?v=4"></script>
-  
-  <!-- ================= เรียกใช้ไฟล์เปลี่ยนธีม ================= -->
+
+  <!-- ปุ่มเปลี่ยนธีม -->
   <script src="/js/theme.js"></script>
+
+  <script>
+    // Reveal on scroll + ไฮไลต์ section ที่กำลังดู (เฉพาะหน้าแรก)
+    (() => {
+      const reveals = document.querySelectorAll('.lh-reveal');
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduce || !('IntersectionObserver' in window)) {
+        reveals.forEach(el => el.classList.add('is-in'));
+      } else {
+        const io = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        reveals.forEach(el => io.observe(el));
+      }
+
+      const links = document.querySelectorAll('.lh-index a, .lh-nav__links a');
+      if (!('IntersectionObserver' in window)) return;
+      const spy = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const id = '#' + entry.target.id;
+          links.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === id));
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      ['features', 'workflow', 'team', 'start'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) spy.observe(el);
+      });
+    })();
+  </script>
 
 </body>
 </html>
