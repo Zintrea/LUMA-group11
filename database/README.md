@@ -1,67 +1,61 @@
-# Database
+# 🗄️ Database Setup Guide
 
-ส่วนนี้เป็นงานของผู้รับผิดชอบ Database
+เอกสารนี้อธิบายขั้นตอนการตั้งค่าและอัปเดตโครงสร้างฐานข้อมูล (PostgreSQL) สำหรับโปรเจกต์ของเรา
 
-README นี้เป็นตัวอย่างสำหรับบันทึกวิธีใช้งานของส่วนนี้
-ให้แก้ข้อมูลให้ตรงกับงานจริงเมื่อเริ่มพัฒนา
-
-## 1. ส่วนนี้ทำอะไร
-
-ตัวอย่าง:
-
-เก็บข้อมูลที่ใช้ในระบบ LUMA เช่น
-
-- ข้อมูลผู้ใช้
-- ประวัติการใช้งาน
-- Prompt
-- ผลการประมวลผล
-
-## 2. ต้องลงอะไร
-
-ตัวอย่าง:
-
-- PostgreSQL
-- pgAdmin
-
-## 3. ติดตั้งและสร้าง Database
-
-ตัวอย่าง:
-
-1. ติดตั้ง PostgreSQL
-2. เปิด pgAdmin
-3. สร้าง Database ชื่อ:
-
-```text
-luma
-```
-
-4. ถ้ามีไฟล์ SQL เช่น:
-
-```text
-init.sql
-```
-
-ให้เปิดและ Execute ไฟล์นั้น
-
-## 4. ทดสอบ
-
-ตัวอย่าง:
-
-ลองเพิ่มข้อมูล:
-
-```sql
-INSERT INTO test_table (name)
-VALUES ('LUMA Test');
-```
-
-แล้วลองอ่านข้อมูล:
-
-```sql
-SELECT * FROM test_table;
-```
-
-ถ้าสามารถ INSERT และ SELECT ได้ ถือว่า Database ทำงานสำเร็จ
+## 📋 สิ่งที่ต้องเตรียม
+* โปแกรม PostgreSQL
+* เครื่องมือจัดการฐานข้อมูล เช่น pgAdmin, DBeaver หรือใช้งานผ่าน `psql` command line
 
 ---
 
-เมื่อเริ่มพัฒนาจริง ให้แก้ README นี้ให้ตรงกับชื่อ Database, Table และวิธีติดตั้งของจริง
+## 🚀 ขั้นตอนการติดตั้ง (Database Initialization)
+
+ในการติดตั้งฐานข้อมูลครั้งแรก กรุณาทำตาม 2 ขั้นตอนด้านล่างนี้ตามลำดับ:
+
+### ขั้นตอนที่ 1: รันสคริปต์เริ่มต้น
+นำไฟล์ `init (1).sql` ไปรันในฐานข้อมูลของคุณ สคริปต์นี้จะทำการเคลียร์ข้อมูลเก่า (ถ้ามี) และสร้างโครงสร้างพื้นฐานใหม่ทั้งหมด 
+
+**สิ่งที่จะถูกสร้างในขั้นตอนนี้:**
+- `task_type_enum` และ `task_status_enum`
+- ตาราง `users` (ข้อมูลผู้ใช้เบื้องต้น)
+- ตาราง `image_tasks` (ข้อมูลงานประมวลผลภาพ)
+- Trigger สำหรับอัปเดตฟิลด์ `updated_at` อัตโนมัติเมื่อมีการแก้ไขข้อมูล
+
+### ขั้นตอนที่ 2: รันคำสั่งอัปเดตตาราง (Schema Update)
+หลังจากรันขั้นตอนที่ 1 เสร็จสมบูรณ์แล้ว ให้ทำการรันคำสั่ง SQL ด้านล่างนี้เพิ่มเติม เพื่อเพิ่มคอลัมน์สำหรับการจัดการสิทธิ์และสถานะของผู้ใช้งานเข้าไปในตาราง `users`:
+
+```sql
+ALTER TABLE users
+ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user',
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+```
+
+---
+
+## 📊 สรุปโครงสร้างตาราง (Schema Overview)
+
+เพื่อให้ทีมเห็นภาพรวม หลังจากทำตามขั้นตอนครบถ้วนแล้ว โครงสร้างของตารางหลักจะมีรายละเอียดดังนี้:
+
+### 1. `users` Table (ตารางผู้ใช้งาน)
+| Column | Type | Constraints / Default | Note |
+| :--- | :--- | :--- | :--- |
+| `id` | SERIAL | PRIMARY KEY | |
+| `username` | VARCHAR(50) | NOT NULL | |
+| `email` | VARCHAR(100) | UNIQUE, NOT NULL | |
+| `password_hash` | VARCHAR(255)| NOT NULL | |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | |
+| `role` | VARCHAR(20) | NOT NULL, DEFAULT 'user' | *(เพิ่มใหม่ในขั้นตอน 2)* |
+| `is_active` | BOOLEAN | NOT NULL, DEFAULT TRUE | *(เพิ่มใหม่ในขั้นตอน 2)* |
+
+### 2. `image_tasks` Table (ตารางงานประมวลผลภาพ)
+| Column | Type | Constraints / Default |
+| :--- | :--- | :--- |
+| `id` | SERIAL | PRIMARY KEY |
+| `user_id` | INTEGER | FOREIGN KEY (users.id) ON DELETE CASCADE |
+| `task_type` | task_type_enum | NOT NULL ('generate', 'remove_bg', 'enhance') |
+| `status` | task_status_enum | DEFAULT 'pending' ('pending', 'processing', 'completed', 'failed') |
+| `prompt_text` | TEXT | |
+| `input_image_path` | TEXT | |
+| `output_image_path`| TEXT | |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
+| `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP (มี Trigger อัปเดตอัตโนมัติ) |

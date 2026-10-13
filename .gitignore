@@ -1,11 +1,26 @@
 .env
+backend/.env
+
 __pycache__/
 *.pyc
+
 venv/
 .venv/
+
 node_modules/
+
 *.log
+
 *.safetensors
 *.ckpt
 *.pt
 *.pth
+
+forge_test.png
+
+# LUMA PC2 rembg local runtime
+ai/rembg/.venv/
+ai/rembg/models/
+ai/rembg/logs/
+ai/rembg/output/
+ai/rembg/rembg.pid
