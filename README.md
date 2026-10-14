@@ -25,6 +25,8 @@ AI Image Processing Project — Group 11
 
 รันทั้งหมดบนเครื่องเดียวได้ โดยใส่ IP ทุกจุดเป็น `127.0.0.1`
 
+แต่ละโฟลเดอร์มี README ย่อยที่อธิบายส่วนนั้นอย่างละเอียด: `frontend/README.md`, `ai/README.md`, `backend/README.md`, `database/README.md`
+
 ## สิ่งที่ต้องมี
 
 - Windows 10/11, Git
